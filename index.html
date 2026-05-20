@@ -7,7 +7,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Watchlist"/>
-<meta name="description" content="A minha lista de filmes e séries"/>
 <link rel="manifest" href="manifest.json"/>
 <link rel="apple-touch-icon" href="icon-192.png"/>
 <link rel="icon" href="icon-192.png"/>
@@ -29,11 +28,30 @@
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:5rem}
 
+/* LOGIN SCREEN */
+#login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;text-align:center}
+.login-logo{width:72px;height:72px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:1.5rem}
+#login-screen h1{font-size:28px;font-weight:700;letter-spacing:-.03em;margin-bottom:.5rem}
+#login-screen p{color:var(--text2);font-size:15px;margin-bottom:2rem}
+.google-btn{display:inline-flex;align-items:center;gap:10px;padding:12px 24px;border-radius:var(--radius-lg);font-size:15px;font-weight:600;cursor:pointer;border:1px solid var(--border-hi);background:var(--surface);color:var(--text);transition:all .15s}
+.google-btn:hover{background:var(--surface2);transform:translateY(-1px);box-shadow:var(--shadow)}
+.google-btn img{width:20px;height:20px}
+.login-footer{margin-top:1.5rem;font-size:12px;color:var(--text3)}
+
+/* SYNC STATUS */
+#sync-status{font-size:12px;color:var(--text3);display:flex;align-items:center;gap:5px}
+#sync-status.syncing{color:var(--yellow)}
+#sync-status.synced{color:var(--green)}
+#sync-status.error{color:var(--red)}
+
+/* TOPBAR */
 .topbar{background:rgba(14,14,16,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:.9rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:60;gap:12px}
 .topbar-brand{display:flex;align-items:center;gap:10px}
 .topbar-brand .logo{width:32px;height:32px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px}
-.topbar-brand h1{font-size:17px;font-weight:700;letter-spacing:-.03em;color:var(--text)}
-.topbar-right{display:flex;gap:7px;align-items:center}
+.topbar-brand h1{font-size:17px;font-weight:700;letter-spacing:-.03em}
+.topbar-right{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.user-chip{display:flex;align-items:center;gap:7px;padding:5px 10px;border-radius:20px;border:1px solid var(--border-med);background:var(--surface2);font-size:12px;color:var(--text2)}
+.user-chip img{width:22px;height:22px;border-radius:50%}
 
 .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border-med);background:var(--surface2);color:var(--text2);transition:all .15s;white-space:nowrap}
 .btn:hover{background:var(--surface3);color:var(--text);border-color:var(--border-hi)}
@@ -81,7 +99,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .card.drag-over{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
 .drag-handle{position:absolute;top:12px;left:-4px;color:var(--text3);cursor:grab;padding:4px;opacity:0;transition:opacity .15s;font-size:16px}
 .card:hover .drag-handle{opacity:1}
-.drag-handle:active{cursor:grabbing}
 
 .card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:8px}
 .card-top-left{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
@@ -160,11 +177,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
 
-/* install banner */
-#install-banner{display:none;position:fixed;bottom:1rem;right:1rem;z-index:500;background:var(--surface);border:1px solid var(--accent-border);border-radius:var(--radius-lg);padding:1rem 1.25rem;box-shadow:var(--shadow);max-width:280px}
-#install-banner p{font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.5}
-#install-banner .banner-actions{display:flex;gap:8px}
-
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
@@ -176,61 +188,78 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .stats{grid-template-columns:repeat(2,1fr)}
   .search-wrap{order:-1;width:100%}
   .search-input{width:100%}
-  .topbar-brand h1{font-size:15px}
   .btn span{display:none}
 }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="topbar-brand">
-    <div class="logo">🎬</div>
-    <h1>Watchlist</h1>
-  </div>
-  <div class="topbar-right">
-    <button class="btn" onclick="exportJSON()"><i class="ti ti-download"></i><span> Exportar</span></button>
-    <label class="btn" style="cursor:pointer"><i class="ti ti-upload"></i><span> Importar</span><input type="file" accept=".json" onchange="importJSON(event)" style="display:none"/></label>
-    <button class="btn primary" onclick="openModal()"><i class="ti ti-plus"></i><span> Adicionar</span></button>
-  </div>
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-logo">🎬</div>
+  <h1>Watchlist</h1>
+  <p>A tua lista de filmes e séries,<br>sincronizada em todos os dispositivos</p>
+  <button class="google-btn" onclick="loginGoogle()">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"/>
+    Entrar com Google
+  </button>
+  <p class="login-footer">Os teus dados ficam guardados de forma segura na cloud do Google</p>
 </div>
 
-<div class="main">
-  <div class="stats">
-    <div class="stat stat-s"><div class="stat-label">Total</div><div class="stat-val" id="s-total">0</div><div class="stat-sub" id="s-total-sub"></div></div>
-    <div class="stat stat-m"><div class="stat-label">Séries</div><div class="stat-val" id="s-series">0</div><div class="stat-sub" id="s-series-sub"></div></div>
-    <div class="stat stat-f"><div class="stat-label">Filmes</div><div class="stat-val" id="s-movies">0</div></div>
-    <div class="stat stat-e"><div class="stat-label">Eps vistos</div><div class="stat-val" id="s-eps">0</div><div class="stat-sub" id="s-eps-sub"></div></div>
-  </div>
-  <div class="cat-bar" id="cat-bar"></div>
-  <div class="toolbar">
-    <button class="filter-btn active" onclick="setTypeFilter('all',this)">Todos</button>
-    <button class="filter-btn" onclick="setTypeFilter('series',this)">Séries</button>
-    <button class="filter-btn" onclick="setTypeFilter('movie',this)">Filmes</button>
-    <button class="filter-btn" onclick="setTypeFilter('fav',this)"><i class="ti ti-star"></i> Favoritos</button>
-    <div class="divider"></div>
-    <select class="sort-select" id="sort-select" onchange="render()">
-      <option value="manual">Ordem manual</option>
-      <option value="name">Nome A→Z</option>
-      <option value="name-desc">Nome Z→A</option>
-      <option value="added">Mais recente</option>
-      <option value="added-asc">Mais antigo</option>
-      <option value="progress">Mais progresso</option>
-      <option value="progress-asc">Menos progresso</option>
-    </select>
-    <select class="view-select" id="view-select" onchange="toggleView()">
-      <option value="grid">⊞ Grelha</option>
-      <option value="list">☰ Lista</option>
-    </select>
-    <div class="search-wrap">
-      <i class="ti ti-search"></i>
-      <input class="search-input" id="search" type="text" placeholder="Pesquisar..." oninput="render()"/>
+<!-- APP -->
+<div id="app" style="display:none">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="logo">🎬</div>
+      <h1>Watchlist</h1>
+    </div>
+    <div class="topbar-right">
+      <div id="sync-status"><i class="ti ti-cloud-check"></i> Sincronizado</div>
+      <div class="user-chip" id="user-chip"></div>
+      <button class="btn" onclick="exportJSON()"><i class="ti ti-download"></i><span> Exportar</span></button>
+      <label class="btn" style="cursor:pointer"><i class="ti ti-upload"></i><span> Importar</span><input type="file" accept=".json" onchange="importJSON(event)" style="display:none"/></label>
+      <button class="btn primary" onclick="openModal()"><i class="ti ti-plus"></i><span> Adicionar</span></button>
+      <button class="btn" onclick="logoutUser()" title="Sair"><i class="ti ti-logout"></i></button>
     </div>
   </div>
-  <div class="grid" id="grid"></div>
+
+  <div class="main">
+    <div class="stats">
+      <div class="stat stat-s"><div class="stat-label">Total</div><div class="stat-val" id="s-total">0</div><div class="stat-sub" id="s-total-sub"></div></div>
+      <div class="stat stat-m"><div class="stat-label">Séries</div><div class="stat-val" id="s-series">0</div><div class="stat-sub" id="s-series-sub"></div></div>
+      <div class="stat stat-f"><div class="stat-label">Filmes</div><div class="stat-val" id="s-movies">0</div></div>
+      <div class="stat stat-e"><div class="stat-label">Eps vistos</div><div class="stat-val" id="s-eps">0</div><div class="stat-sub" id="s-eps-sub"></div></div>
+    </div>
+    <div class="cat-bar" id="cat-bar"></div>
+    <div class="toolbar">
+      <button class="filter-btn active" onclick="setTypeFilter('all',this)">Todos</button>
+      <button class="filter-btn" onclick="setTypeFilter('series',this)">Séries</button>
+      <button class="filter-btn" onclick="setTypeFilter('movie',this)">Filmes</button>
+      <button class="filter-btn" onclick="setTypeFilter('fav',this)"><i class="ti ti-star"></i> Favoritos</button>
+      <div class="divider"></div>
+      <select class="sort-select" id="sort-select" onchange="render()">
+        <option value="manual">Ordem manual</option>
+        <option value="name">Nome A→Z</option>
+        <option value="name-desc">Nome Z→A</option>
+        <option value="added">Mais recente</option>
+        <option value="added-asc">Mais antigo</option>
+        <option value="progress">Mais progresso</option>
+        <option value="progress-asc">Menos progresso</option>
+      </select>
+      <select class="view-select" id="view-select" onchange="toggleView()">
+        <option value="grid">⊞ Grelha</option>
+        <option value="list">☰ Lista</option>
+      </select>
+      <div class="search-wrap">
+        <i class="ti ti-search"></i>
+        <input class="search-input" id="search" type="text" placeholder="Pesquisar..." oninput="render()"/>
+      </div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </div>
 </div>
 
-<!-- Add/Edit Modal -->
+<!-- Modals -->
 <div class="modal-bg" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <h2 id="modal-title">Adicionar título</h2>
@@ -255,12 +284,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
       <div class="field"><label>Categoria</label><select id="f-cat"></select></div>
     </div>
-    <div class="field"><label>Notas</label><textarea id="f-notes" placeholder="Notas livres, onde ficaste, o que achaste..."></textarea></div>
+    <div class="field"><label>Notas</label><textarea id="f-notes" placeholder="Notas livres, onde ficaste..."></textarea></div>
     <div class="field"><label>Prioridade</label>
-      <select id="f-priority">
-        <option value="0">Normal</option>
-        <option value="1">⭐ Favorito</option>
-      </select>
+      <select id="f-priority"><option value="0">Normal</option><option value="1">⭐ Favorito</option></select>
     </div>
     <div id="series-config">
       <div class="field">
@@ -276,7 +302,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<!-- History Modal -->
 <div class="modal-bg" id="history-modal" onclick="if(event.target===this)closeHistory()">
   <div class="history-panel">
     <h3 id="history-title">Histórico <button class="icon-btn" onclick="closeHistory()" style="margin-left:auto"><i class="ti ti-x"></i></button></h3>
@@ -284,7 +309,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<!-- Category Modal -->
 <div class="modal-bg" id="cat-modal" onclick="if(event.target===this)document.getElementById('cat-modal').classList.remove('open')">
   <div class="modal" style="width:300px;padding:1.25rem">
     <h2 style="margin-bottom:1rem;font-size:16px">Nova categoria</h2>
@@ -296,39 +320,115 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<!-- PWA Install Banner -->
-<div id="install-banner">
-  <p>📲 Instala a Watchlist como app no teu dispositivo!</p>
-  <div class="banner-actions">
-    <button class="btn primary" id="install-btn" onclick="installPWA()">Instalar</button>
-    <button class="btn" onclick="document.getElementById('install-banner').style.display='none'">Depois</button>
-  </div>
-</div>
-
 <div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg"></span></div>
 
-<script>
-let items=[], categories=['A ver agora','Em pausa','Para depois'];
-let typeFilter='all', catFilter=null, dragId=null, openPanels={};
-let deferredInstallPrompt=null;
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
+const firebaseConfig = {
+  apiKey: "AIzaSyC1S1TonvZDmh1Mn0n5wE_gkXaO31biMZQ",
+  authDomain: "watchlist-44f89.firebaseapp.com",
+  projectId: "watchlist-44f89",
+  storageBucket: "watchlist-44f89.firebasestorage.app",
+  messagingSenderId: "895479476623",
+  appId: "1:895479476623:web:514576c23e8251cc7b9bfa"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUser = null;
+let unsubscribe = null;
+let saveTimeout = null;
+
+// ── Auth ──
+window.loginGoogle = async () => {
+  try {
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
+  } catch(e) {
+    toast('Erro ao entrar: ' + e.message);
+  }
+};
+
+window.logoutUser = async () => {
+  if(!confirm('Sair da conta?')) return;
+  if(unsubscribe) unsubscribe();
+  await signOut(auth);
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  items = []; categories = ['A ver agora','Em pausa','Para depois'];
+  toast('Sessão terminada.');
+};
+
+onAuthStateChanged(auth, user => {
+  if(user) {
+    currentUser = user;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('user-chip').innerHTML = `${user.photoURL ? `<img src="${user.photoURL}" alt=""/>` : ''}<span>${user.displayName || user.email}</span>`;
+    startSync();
+  } else {
+    currentUser = null;
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+});
+
+// ── Firestore sync ──
+function setSyncStatus(s) {
+  const el = document.getElementById('sync-status');
+  const icons = { syncing:'ti-cloud-upload', synced:'ti-cloud-check', error:'ti-cloud-off' };
+  const labels = { syncing:'A sincronizar...', synced:'Sincronizado', error:'Erro de ligação' };
+  el.className = s;
+  el.innerHTML = `<i class="ti ${icons[s]}"></i> ${labels[s]}`;
+}
+
+function startSync() {
+  if(unsubscribe) unsubscribe();
+  const ref = doc(db, 'users', currentUser.uid);
+  unsubscribe = onSnapshot(ref, snap => {
+    if(snap.exists()) {
+      const data = snap.data();
+      items = data.items || [];
+      categories = data.categories || ['A ver agora','Em pausa','Para depois'];
+    }
+    setSyncStatus('synced');
+    renderCats();
+    render();
+  }, () => setSyncStatus('error'));
+}
+
+window.saveToFirestore = () => {
+  if(!currentUser) return;
+  clearTimeout(saveTimeout);
+  setSyncStatus('syncing');
+  saveTimeout = setTimeout(async () => {
+    try {
+      await setDoc(doc(db, 'users', currentUser.uid), { items, categories, updatedAt: Date.now() });
+      setSyncStatus('synced');
+    } catch(e) {
+      setSyncStatus('error');
+      toast('Erro ao guardar: ' + e.message);
+    }
+  }, 800);
+};
+
+// override save
+window._save = window.saveToFirestore;
+</script>
+
+<script>
 // ── PWA ──
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
-}
-window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault(); deferredInstallPrompt=e;
-  document.getElementById('install-banner').style.display='block';
-});
-window.addEventListener('appinstalled',()=>{
-  document.getElementById('install-banner').style.display='none';
-  toast('App instalada!');
-});
-function installPWA(){
-  if(!deferredInstallPrompt) return;
-  deferredInstallPrompt.prompt();
-  deferredInstallPrompt.userChoice.then(()=>{ deferredInstallPrompt=null; document.getElementById('install-banner').style.display='none'; });
-}
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+// ── State ──
+let items = [], categories = ['A ver agora','Em pausa','Para depois'];
+let typeFilter = 'all', catFilter = null, dragId = null, openPanels = {};
 
 // ── Helpers ──
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2); }
@@ -339,21 +439,10 @@ function toast(msg){
   const el=document.getElementById('toast'); el.classList.add('show');
   clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),2400);
 }
+function save(){ if(window._save) window._save(); }
+
 const STATUS_LABEL={towatch:'Para ver',watching:'A ver',paused:'Em pausa',done:'Concluído',dropped:'Abandonado'};
 const STATUS_CLASS={towatch:'sb-towatch',watching:'sb-watching',paused:'sb-paused',done:'sb-done',dropped:'sb-dropped'};
-
-// ── Storage ──
-function save(){ try{ localStorage.setItem('watchlist_v4',JSON.stringify({items,categories})); }catch(e){} }
-function load(){
-  try{
-    const d=localStorage.getItem('watchlist_v4');
-    if(d){ const p=JSON.parse(d); items=p.items||[]; categories=p.categories||categories; }
-    else{ const old=localStorage.getItem('watchlist_v3'); if(old) items=JSON.parse(old).map(it=>({...it,status:'towatch',category:'',notes:'',history:[]})); }
-  }catch(e){}
-}
-window.addEventListener('beforeunload',()=>{
-  if(items.length) try{ localStorage.setItem('watchlist_autobackup',JSON.stringify({items,categories,exportedAt:new Date().toISOString()})); }catch(e){}
-});
 
 // ── Export / Import ──
 function exportJSON(){
@@ -361,7 +450,7 @@ function exportJSON(){
   const blob=new Blob([JSON.stringify({items,categories,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob), a=document.createElement('a');
   a.href=url; a.download=`watchlist_${new Date().toISOString().slice(0,10)}.json`;
-  a.click(); URL.revokeObjectURL(url); toast('Ficheiro exportado!');
+  a.click(); URL.revokeObjectURL(url); toast('Exportado!');
 }
 function importJSON(e){
   const file=e.target.files[0]; if(!file) return;
@@ -507,7 +596,7 @@ function onDragEnd(e){ e.currentTarget.classList.remove('dragging'); dragId=null
 function onDragOver(e,id){ e.preventDefault(); document.querySelectorAll('.card').forEach(c=>c.classList.remove('drag-over')); if(dragId&&dragId!==id) e.currentTarget.classList.add('drag-over'); }
 function onDrop(e,id){ e.preventDefault(); e.currentTarget.classList.remove('drag-over'); if(!dragId||dragId===id) return; const from=items.findIndex(i=>i.id===dragId), to=items.findIndex(i=>i.id===id); if(from<0||to<0) return; const[moved]=items.splice(from,1); items.splice(to,0,moved); document.getElementById('sort-select').value='manual'; save(); render(); }
 
-// ── View ──
+// ── Filter / View ──
 function setTypeFilter(f,btn){ typeFilter=f; document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); render(); }
 function toggleView(){ document.getElementById('grid').classList.toggle('list-view',document.getElementById('view-select').value==='list'); }
 
@@ -567,8 +656,6 @@ function render(){
     return `<div class="card" draggable="true" ondragstart="onDragStart(event,'${it.id}')" ondragend="onDragEnd(event)" ondragover="onDragOver(event,'${it.id}')" ondrop="onDrop(event,'${it.id}')"><i class="ti ti-grip-vertical drag-handle"></i><div class="card-top"><div class="card-top-left"><span class="badge ${badgeClass}">${badgeLabel}</span><span class="status-badge ${STATUS_CLASS[status]}">${STATUS_LABEL[status]}</span></div><div class="card-actions"><button class="icon-btn${it.fav?' fav-on':''}" onclick="toggleFav('${it.id}')"><i class="ti ti-star${it.fav?'-filled':''}"></i></button><button class="icon-btn" onclick="openModal('${it.id}')"><i class="ti ti-edit"></i></button><button class="icon-btn" onclick="remove('${it.id}')"><i class="ti ti-trash"></i></button></div></div><div class="card-title">${it.title}</div>${catLabel}${notesHtml}${seasonsHtml}</div>`;
   }).join('');
 }
-
-load(); renderCats(); render();
 </script>
 </body>
 </html>
