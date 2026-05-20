@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="theme-color" content="#0e0e10"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Watchlist"/>
+<meta name="description" content="A minha lista de filmes e séries"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<link rel="icon" href="icon-192.png"/>
+<title>Watchlist</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0e0e10;--surface:#18181b;--surface2:#1f1f23;--surface3:#27272c;
+  --border:rgba(255,255,255,.07);--border-med:rgba(255,255,255,.13);--border-hi:rgba(255,255,255,.22);
+  --text:#f4f4f5;--text2:#a1a1aa;--text3:#52525b;
+  --accent:#a78bfa;--accent-dim:rgba(167,139,250,.15);--accent-border:rgba(167,139,250,.35);
+  --green:#34d399;--green-dim:rgba(52,211,153,.12);
+  --yellow:#fbbf24;--yellow-dim:rgba(251,191,36,.12);
+  --red:#f87171;--red-dim:rgba(248,113,113,.12);
+  --blue:#60a5fa;--blue-dim:rgba(96,165,250,.12);
+  --radius:10px;--radius-lg:14px;--radius-xl:18px;
+  --shadow:0 4px 24px rgba(0,0,0,.45);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:5rem}
+
+.topbar{background:rgba(14,14,16,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:.9rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:60;gap:12px}
+.topbar-brand{display:flex;align-items:center;gap:10px}
+.topbar-brand .logo{width:32px;height:32px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px}
+.topbar-brand h1{font-size:17px;font-weight:700;letter-spacing:-.03em;color:var(--text)}
+.topbar-right{display:flex;gap:7px;align-items:center}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border-med);background:var(--surface2);color:var(--text2);transition:all .15s;white-space:nowrap}
+.btn:hover{background:var(--surface3);color:var(--text);border-color:var(--border-hi)}
+.btn.primary{background:var(--accent);color:#0e0e10;border-color:var(--accent);font-weight:600}
+.btn.primary:hover{opacity:.88}
+.btn i{font-size:15px}
+
+.main{max-width:1120px;margin:0 auto;padding:1.5rem 2rem}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.75rem}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--stat-color,transparent) 0%,transparent 60%);opacity:.06;pointer-events:none}
+.stat-label{font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.stat-val{font-size:28px;font-weight:700;color:var(--text);letter-spacing:-.02em}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.stat-s{--stat-color:var(--accent)}.stat-m{--stat-color:var(--green)}.stat-f{--stat-color:var(--yellow)}.stat-e{--stat-color:var(--blue)}
+
+.cat-bar{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+.cat-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border-med);background:transparent;color:var(--text2);transition:all .15s}
+.cat-chip:hover{background:var(--surface2);color:var(--text);border-color:var(--border-hi)}
+.cat-chip.active{background:var(--accent);color:#0e0e10;border-color:var(--accent)}
+.cat-chip .cat-del{margin-left:2px;opacity:.6;cursor:pointer;font-size:13px;display:flex;align-items:center}
+.cat-chip .cat-del:hover{opacity:1}
+.cat-add-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px dashed var(--border-med);background:transparent;color:var(--text3);transition:all .15s}
+.cat-add-btn:hover{color:var(--text2);border-color:var(--border-hi)}
+
+.toolbar{display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap;align-items:center}
+.filter-btn{padding:6px 13px;border-radius:var(--radius);font-size:13px;border:1px solid var(--border-med);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px;font-weight:500}
+.filter-btn:hover{background:var(--surface3);color:var(--text);border-color:var(--border-hi)}
+.filter-btn.active{background:var(--surface3);color:var(--text);border-color:var(--border-hi)}
+.divider{width:1px;height:24px;background:var(--border);margin:0 2px}
+.sort-select,.view-select{padding:6px 10px;border-radius:var(--radius);font-size:13px;border:1px solid var(--border-med);background:var(--surface2);color:var(--text2);cursor:pointer;outline:none;font-family:inherit;transition:all .15s}
+.sort-select:hover,.view-select:hover{border-color:var(--border-hi);color:var(--text)}
+.search-wrap{margin-left:auto;position:relative}
+.search-wrap i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:15px;pointer-events:none}
+.search-input{padding:7px 12px 7px 32px;border-radius:var(--radius);border:1px solid var(--border-med);background:var(--surface2);color:var(--text);font-size:13px;width:210px;outline:none;transition:all .15s}
+.search-input:focus{border-color:var(--accent-border);box-shadow:0 0 0 3px var(--accent-dim)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.grid.list-view{grid-template-columns:1fr}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:1.1rem;transition:border-color .15s,transform .1s,box-shadow .15s;cursor:default;position:relative}
+.card:hover{border-color:var(--border-med);transform:translateY(-2px);box-shadow:var(--shadow)}
+.card.dragging{opacity:.5;transform:scale(.97)}
+.card.drag-over{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
+.drag-handle{position:absolute;top:12px;left:-4px;color:var(--text3);cursor:grab;padding:4px;opacity:0;transition:opacity .15s;font-size:16px}
+.card:hover .drag-handle{opacity:1}
+.drag-handle:active{cursor:grabbing}
+
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:8px}
+.card-top-left{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:.05em;text-transform:uppercase}
+.badge-series{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border)}
+.badge-movie{background:var(--green-dim);color:var(--green);border:1px solid rgba(52,211,153,.3)}
+.status-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;letter-spacing:.03em}
+.sb-watching{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(96,165,250,.3)}
+.sb-paused{background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(251,191,36,.3)}
+.sb-towatch{background:rgba(255,255,255,.05);color:var(--text3);border:1px solid var(--border)}
+.sb-done{background:var(--green-dim);color:var(--green);border:1px solid rgba(52,211,153,.3)}
+.sb-dropped{background:var(--red-dim);color:var(--red);border:1px solid rgba(248,113,113,.3)}
+
+.card-actions{display:flex;gap:2px;flex-shrink:0}
+.icon-btn{background:transparent;border:none;cursor:pointer;color:var(--text3);padding:5px;border-radius:8px;display:flex;align-items:center;transition:color .15s,background .15s;font-size:15px}
+.icon-btn:hover{color:var(--text);background:var(--surface3)}
+.icon-btn.fav-on{color:var(--yellow)}
+.card-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;line-height:1.3;letter-spacing:-.01em}
+.card-cat{font-size:11px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:4px}
+.card-notes{font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.5;border-left:2px solid var(--border-hi);padding-left:8px;font-style:italic}
+
+.progress-bar{height:4px;background:var(--surface3);border-radius:4px;margin-bottom:6px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:4px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+.progress-label{font-size:11px;color:var(--text3);margin-bottom:10px;display:flex;justify-content:space-between}
+
+.season-block{margin-bottom:5px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.season-header{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;cursor:pointer;background:var(--surface2);gap:8px;transition:background .15s}
+.season-header:hover{background:var(--surface3)}
+.season-header-left{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;flex:1}
+.season-header-right{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text2);white-space:nowrap}
+.season-check{width:17px;height:17px;border-radius:50%;border:1.5px solid var(--border-hi);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;cursor:pointer}
+.season-check.done{background:var(--green);border-color:var(--green)}
+.season-check.done::after{content:'';width:7px;height:7px;background:#0e0e10;border-radius:50%;display:block}
+.season-eps{display:none;padding:10px;background:var(--surface)}
+.season-eps.open{display:block}
+.ep-grid{display:flex;flex-wrap:wrap;gap:4px}
+.ep-pill{font-size:11px;padding:3px 8px;border-radius:20px;border:1px solid var(--border-med);cursor:pointer;color:var(--text2);background:transparent;transition:all .15s;font-weight:500;white-space:nowrap}
+.ep-pill.done{background:var(--accent);color:#0e0e10;border-color:var(--accent);font-weight:600}
+.ep-pill:hover:not(.done){background:var(--surface3);color:var(--text);border-color:var(--border-hi)}
+.ep-actions{display:flex;gap:10px;margin-bottom:8px;align-items:center}
+.ep-action-btn{font-size:11px;color:var(--text3);background:transparent;border:none;cursor:pointer;padding:0;transition:color .15s}
+.ep-action-btn:hover{color:var(--accent)}
+.chevron{transition:transform .2s;font-size:13px;color:var(--text3)}
+.chevron.open{transform:rotate(180deg)}
+
+.empty{grid-column:1/-1;text-align:center;padding:5rem 1rem;color:var(--text3);font-size:14px}
+.empty i{font-size:44px;display:block;margin-bottom:12px}
+.empty p{font-size:13px;margin-top:4px}
+
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border-med);border-radius:var(--radius-xl);padding:1.75rem;width:460px;max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.6)}
+.modal h2{font-size:18px;font-weight:700;margin-bottom:1.5rem;letter-spacing:-.02em}
+.field{margin-bottom:14px}
+.field label{font-size:11px;color:var(--text2);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.field input,.field select,.field textarea{width:100%;padding:9px 12px;font-size:14px;border:1px solid var(--border-med);border-radius:var(--radius);background:var(--surface2);color:var(--text);outline:none;font-family:inherit;transition:border-color .15s}
+.field textarea{resize:vertical;min-height:70px;line-height:1.5}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent-border);box-shadow:0 0 0 3px var(--accent-dim)}
+.field select option{background:var(--surface2)}
+.fields-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.season-row{display:grid;grid-template-columns:1fr 1fr auto;align-items:center;gap:8px;margin-bottom:8px}
+.season-row-label{font-size:13px;color:var(--text2)}
+.add-season-btn{font-size:13px;color:var(--text3);background:transparent;border:1px dashed var(--border-med);border-radius:var(--radius);padding:8px 12px;cursor:pointer;width:100%;margin-top:2px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.add-season-btn:hover{background:var(--surface3);color:var(--text2);border-color:var(--border-hi)}
+.remove-season-btn{background:transparent;border:none;cursor:pointer;color:var(--text3);font-size:16px;display:flex;align-items:center;padding:4px;border-radius:6px;transition:all .15s}
+.remove-season-btn:hover{color:var(--red);background:var(--red-dim)}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)}
+
+.history-panel{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-xl);padding:1.25rem;width:420px;max-width:96vw;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow)}
+.history-panel h3{font-size:16px;font-weight:700;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center}
+.history-entry{padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px}
+.history-entry:last-child{border-bottom:none}
+.history-entry .he-date{color:var(--text3);font-size:11px;white-space:nowrap}
+
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(12px);background:var(--surface);border:1px solid var(--border-hi);color:var(--text);padding:10px 18px;border-radius:var(--radius);font-size:13px;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;z-index:999;white-space:nowrap;box-shadow:var(--shadow);display:flex;align-items:center;gap:8px}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+
+/* install banner */
+#install-banner{display:none;position:fixed;bottom:1rem;right:1rem;z-index:500;background:var(--surface);border:1px solid var(--accent-border);border-radius:var(--radius-lg);padding:1rem 1.25rem;box-shadow:var(--shadow);max-width:280px}
+#install-banner p{font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.5}
+#install-banner .banner-actions{display:flex;gap:8px}
+
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--border-hi)}
+
+@media(max-width:640px){
+  .topbar{padding:.8rem 1rem;flex-wrap:wrap;gap:8px}
+  .main{padding:1rem}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .search-wrap{order:-1;width:100%}
+  .search-input{width:100%}
+  .topbar-brand h1{font-size:15px}
+  .btn span{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="logo">🎬</div>
+    <h1>Watchlist</h1>
+  </div>
+  <div class="topbar-right">
+    <button class="btn" onclick="exportJSON()"><i class="ti ti-download"></i><span> Exportar</span></button>
+    <label class="btn" style="cursor:pointer"><i class="ti ti-upload"></i><span> Importar</span><input type="file" accept=".json" onchange="importJSON(event)" style="display:none"/></label>
+    <button class="btn primary" onclick="openModal()"><i class="ti ti-plus"></i><span> Adicionar</span></button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="stats">
+    <div class="stat stat-s"><div class="stat-label">Total</div><div class="stat-val" id="s-total">0</div><div class="stat-sub" id="s-total-sub"></div></div>
+    <div class="stat stat-m"><div class="stat-label">Séries</div><div class="stat-val" id="s-series">0</div><div class="stat-sub" id="s-series-sub"></div></div>
+    <div class="stat stat-f"><div class="stat-label">Filmes</div><div class="stat-val" id="s-movies">0</div></div>
+    <div class="stat stat-e"><div class="stat-label">Eps vistos</div><div class="stat-val" id="s-eps">0</div><div class="stat-sub" id="s-eps-sub"></div></div>
+  </div>
+  <div class="cat-bar" id="cat-bar"></div>
+  <div class="toolbar">
+    <button class="filter-btn active" onclick="setTypeFilter('all',this)">Todos</button>
+    <button class="filter-btn" onclick="setTypeFilter('series',this)">Séries</button>
+    <button class="filter-btn" onclick="setTypeFilter('movie',this)">Filmes</button>
+    <button class="filter-btn" onclick="setTypeFilter('fav',this)"><i class="ti ti-star"></i> Favoritos</button>
+    <div class="divider"></div>
+    <select class="sort-select" id="sort-select" onchange="render()">
+      <option value="manual">Ordem manual</option>
+      <option value="name">Nome A→Z</option>
+      <option value="name-desc">Nome Z→A</option>
+      <option value="added">Mais recente</option>
+      <option value="added-asc">Mais antigo</option>
+      <option value="progress">Mais progresso</option>
+      <option value="progress-asc">Menos progresso</option>
+    </select>
+    <select class="view-select" id="view-select" onchange="toggleView()">
+      <option value="grid">⊞ Grelha</option>
+      <option value="list">☰ Lista</option>
+    </select>
+    <div class="search-wrap">
+      <i class="ti ti-search"></i>
+      <input class="search-input" id="search" type="text" placeholder="Pesquisar..." oninput="render()"/>
+    </div>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-bg" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h2 id="modal-title">Adicionar título</h2>
+    <div class="fields-row">
+      <div class="field"><label>Título</label><input id="f-title" placeholder="Ex: Breaking Bad"/></div>
+      <div class="field"><label>Tipo</label>
+        <select id="f-type" onchange="toggleType()">
+          <option value="series">Série</option>
+          <option value="movie">Filme</option>
+        </select>
+      </div>
+    </div>
+    <div class="fields-row">
+      <div class="field"><label>Estado</label>
+        <select id="f-status">
+          <option value="towatch">Para ver</option>
+          <option value="watching">A ver</option>
+          <option value="paused">Em pausa</option>
+          <option value="done">Concluído</option>
+          <option value="dropped">Abandonado</option>
+        </select>
+      </div>
+      <div class="field"><label>Categoria</label><select id="f-cat"></select></div>
+    </div>
+    <div class="field"><label>Notas</label><textarea id="f-notes" placeholder="Notas livres, onde ficaste, o que achaste..."></textarea></div>
+    <div class="field"><label>Prioridade</label>
+      <select id="f-priority">
+        <option value="0">Normal</option>
+        <option value="1">⭐ Favorito</option>
+      </select>
+    </div>
+    <div id="series-config">
+      <div class="field">
+        <label>Temporadas e episódios</label>
+        <div id="seasons-config"></div>
+        <button class="add-season-btn" onclick="addSeasonRow()"><i class="ti ti-plus"></i> Adicionar temporada</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+      <button class="btn primary" onclick="saveItem()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- History Modal -->
+<div class="modal-bg" id="history-modal" onclick="if(event.target===this)closeHistory()">
+  <div class="history-panel">
+    <h3 id="history-title">Histórico <button class="icon-btn" onclick="closeHistory()" style="margin-left:auto"><i class="ti ti-x"></i></button></h3>
+    <div id="history-body"></div>
+  </div>
+</div>
+
+<!-- Category Modal -->
+<div class="modal-bg" id="cat-modal" onclick="if(event.target===this)document.getElementById('cat-modal').classList.remove('open')">
+  <div class="modal" style="width:300px;padding:1.25rem">
+    <h2 style="margin-bottom:1rem;font-size:16px">Nova categoria</h2>
+    <div class="field"><label>Nome</label><input id="cat-input" placeholder="Ex: A ver agora" maxlength="30"/></div>
+    <div class="modal-actions" style="padding-top:.75rem">
+      <button class="btn" onclick="document.getElementById('cat-modal').classList.remove('open')">Cancelar</button>
+      <button class="btn primary" onclick="saveCategory()">Criar</button>
+    </div>
+  </div>
+</div>
+
+<!-- PWA Install Banner -->
+<div id="install-banner">
+  <p>📲 Instala a Watchlist como app no teu dispositivo!</p>
+  <div class="banner-actions">
+    <button class="btn primary" id="install-btn" onclick="installPWA()">Instalar</button>
+    <button class="btn" onclick="document.getElementById('install-banner').style.display='none'">Depois</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg"></span></div>
+
+<script>
+let items=[], categories=['A ver agora','Em pausa','Para depois'];
+let typeFilter='all', catFilter=null, dragId=null, openPanels={};
+let deferredInstallPrompt=null;
+
+// ── PWA ──
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault(); deferredInstallPrompt=e;
+  document.getElementById('install-banner').style.display='block';
+});
+window.addEventListener('appinstalled',()=>{
+  document.getElementById('install-banner').style.display='none';
+  toast('App instalada!');
+});
+function installPWA(){
+  if(!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then(()=>{ deferredInstallPrompt=null; document.getElementById('install-banner').style.display='none'; });
+}
+
+// ── Helpers ──
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2); }
+function fmtDate(ts){ if(!ts) return ''; return new Date(ts).toLocaleDateString('pt-PT',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function fmtDateShort(ts){ if(!ts) return ''; return new Date(ts).toLocaleDateString('pt-PT',{day:'2-digit',month:'short'}); }
+function toast(msg){
+  document.getElementById('toast-msg').textContent=msg;
+  const el=document.getElementById('toast'); el.classList.add('show');
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),2400);
+}
+const STATUS_LABEL={towatch:'Para ver',watching:'A ver',paused:'Em pausa',done:'Concluído',dropped:'Abandonado'};
+const STATUS_CLASS={towatch:'sb-towatch',watching:'sb-watching',paused:'sb-paused',done:'sb-done',dropped:'sb-dropped'};
+
+// ── Storage ──
+function save(){ try{ localStorage.setItem('watchlist_v4',JSON.stringify({items,categories})); }catch(e){} }
+function load(){
+  try{
+    const d=localStorage.getItem('watchlist_v4');
+    if(d){ const p=JSON.parse(d); items=p.items||[]; categories=p.categories||categories; }
+    else{ const old=localStorage.getItem('watchlist_v3'); if(old) items=JSON.parse(old).map(it=>({...it,status:'towatch',category:'',notes:'',history:[]})); }
+  }catch(e){}
+}
+window.addEventListener('beforeunload',()=>{
+  if(items.length) try{ localStorage.setItem('watchlist_autobackup',JSON.stringify({items,categories,exportedAt:new Date().toISOString()})); }catch(e){}
+});
+
+// ── Export / Import ──
+function exportJSON(){
+  if(!items.length){ toast('Não há nada para exportar!'); return; }
+  const blob=new Blob([JSON.stringify({items,categories,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=url; a.download=`watchlist_${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url); toast('Ficheiro exportado!');
+}
+function importJSON(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      const arr=Array.isArray(data)?data:(data.items||[]);
+      const cats=data.categories||[];
+      let added=0;
+      arr.forEach(it=>{ if(!items.find(x=>x.id===it.id)){ items.push(it); added++; } });
+      cats.forEach(c=>{ if(!categories.includes(c)) categories.push(c); });
+      save(); renderCats(); render(); toast(`Importado! ${added} título(s) adicionado(s).`);
+    }catch{ toast('Erro ao importar.'); }
+  };
+  reader.readAsText(file); e.target.value='';
+}
+
+// ── Categories ──
+function renderCats(){
+  document.getElementById('cat-bar').innerHTML=`
+    <button class="cat-chip${catFilter===null?' active':''}" onclick="setCatFilter(null)">Todas</button>
+    ${categories.map(c=>`<button class="cat-chip${catFilter===c?' active':''}" onclick="setCatFilter('${c}')">${c}<span class="cat-del" onclick="event.stopPropagation();deleteCategory('${c}')"><i class="ti ti-x" style="font-size:11px"></i></span></button>`).join('')}
+    <button class="cat-add-btn" onclick="openCatModal()"><i class="ti ti-plus" style="font-size:12px"></i> Nova lista</button>`;
+}
+function setCatFilter(cat){ catFilter=cat; renderCats(); render(); }
+function openCatModal(){ document.getElementById('cat-input').value=''; document.getElementById('cat-modal').classList.add('open'); setTimeout(()=>document.getElementById('cat-input').focus(),60); }
+function saveCategory(){
+  const name=document.getElementById('cat-input').value.trim(); if(!name) return;
+  if(!categories.includes(name)) categories.push(name);
+  document.getElementById('cat-modal').classList.remove('open');
+  save(); renderCats(); populateCatSelect(); toast(`Categoria "${name}" criada!`);
+}
+function deleteCategory(cat){
+  if(!confirm(`Remover categoria "${cat}"?`)) return;
+  categories=categories.filter(c=>c!==cat);
+  items.forEach(it=>{ if(it.category===cat) it.category=''; });
+  if(catFilter===cat) catFilter=null;
+  save(); renderCats(); render(); toast('Categoria removida.');
+}
+document.getElementById('cat-input').addEventListener('keydown',e=>{ if(e.key==='Enter') saveCategory(); });
+function populateCatSelect(){
+  document.getElementById('f-cat').innerHTML=`<option value="">— Sem categoria —</option>${categories.map(c=>`<option value="${c}">${c}</option>`).join('')}`;
+}
+
+// ── Modal ──
+function addSeasonRow(eps){
+  const container=document.getElementById('seasons-config');
+  const idx=container.querySelectorAll('.season-row').length;
+  const row=document.createElement('div'); row.className='season-row';
+  row.innerHTML=`<span class="season-row-label">T${idx+1}</span><input type="number" min="1" max="999" value="${eps||10}" placeholder="Episódios"/><button class="remove-season-btn" onclick="removeSeasonRow(this)"><i class="ti ti-x"></i></button>`;
+  container.appendChild(row);
+}
+function removeSeasonRow(btn){
+  btn.closest('.season-row').remove();
+  document.querySelectorAll('#seasons-config .season-row').forEach((r,i)=>r.querySelector('.season-row-label').textContent=`T${i+1}`);
+}
+function getModalSeasons(){ return Array.from(document.querySelectorAll('#seasons-config .season-row')).map(r=>({eps:Math.max(1,parseInt(r.querySelector('input').value)||1)})); }
+function toggleType(){ document.getElementById('series-config').style.display=document.getElementById('f-type').value==='series'?'block':'none'; }
+
+let editId=null;
+function openModal(id){
+  editId=id||null;
+  document.getElementById('modal-title').textContent=id?'Editar título':'Adicionar título';
+  document.getElementById('seasons-config').innerHTML='';
+  populateCatSelect();
+  if(id){
+    const it=items.find(i=>i.id===id);
+    document.getElementById('f-title').value=it.title;
+    document.getElementById('f-type').value=it.type;
+    document.getElementById('f-status').value=it.status||'towatch';
+    document.getElementById('f-cat').value=it.category||'';
+    document.getElementById('f-notes').value=it.notes||'';
+    document.getElementById('f-priority').value=it.fav?1:0;
+    (it.seasonList||[]).forEach(s=>addSeasonRow(s.eps));
+  }else{
+    ['f-title','f-notes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('f-type').value='series';
+    document.getElementById('f-status').value='towatch';
+    document.getElementById('f-cat').value='';
+    document.getElementById('f-priority').value=0;
+    addSeasonRow(10);
+  }
+  toggleType();
+  document.getElementById('modal').classList.add('open');
+  setTimeout(()=>document.getElementById('f-title').focus(),60);
+}
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+document.getElementById('f-title').addEventListener('keydown',e=>{ if(e.key==='Enter') saveItem(); });
+
+function saveItem(){
+  const title=document.getElementById('f-title').value.trim(); if(!title){ document.getElementById('f-title').focus(); return; }
+  const type=document.getElementById('f-type').value;
+  const status=document.getElementById('f-status').value;
+  const category=document.getElementById('f-cat').value;
+  const notes=document.getElementById('f-notes').value.trim();
+  const fav=document.getElementById('f-priority').value==='1';
+  const newSeasons=type==='series'?getModalSeasons():[];
+  if(editId){
+    const it=items.find(i=>i.id===editId);
+    const oldList=it.seasonList||[];
+    it.seasonList=newSeasons.map((s,si)=>{ const old=oldList[si]||{}; return{eps:s.eps,doneEps:(old.doneEps||[]).filter(ep=>ep<=s.eps),history:old.history||[]}; });
+    Object.assign(it,{title,type,status,category,notes,fav});
+    toast('Título atualizado!');
+  }else{
+    items.push({id:uid(),title,type,status,category,notes,fav,seasonList:newSeasons.map(s=>({eps:s.eps,doneEps:[],history:[]})),addedAt:Date.now()});
+    toast(`"${title}" adicionado!`);
+  }
+  save(); closeModal(); render();
+}
+
+// ── Actions ──
+function remove(id){ const it=items.find(i=>i.id===id); if(!confirm(`Remover "${it.title}"?`)) return; items=items.filter(i=>i.id!==id); delete openPanels[id]; save(); render(); toast('Removido.'); }
+function toggleFav(id){ const it=items.find(i=>i.id===id); it.fav=!it.fav; save(); render(); }
+function toggleEp(id,si,ep){
+  const it=items.find(i=>i.id===id); const s=it.seasonList[si]; if(!s.history) s.history=[];
+  const idx=s.doneEps.indexOf(ep);
+  if(idx>-1){ s.doneEps.splice(idx,1); s.history=s.history.filter(h=>h.ep!==ep); }
+  else{ s.doneEps.push(ep); s.history.push({ep,ts:Date.now()}); }
+  save(); render();
+}
+function markAllEps(id,si,doMark){
+  const it=items.find(i=>i.id===id); const s=it.seasonList[si]; if(!s.history) s.history=[];
+  if(doMark){ const now=Date.now(); const existing=new Set(s.doneEps); s.doneEps=Array.from({length:s.eps},(_,i)=>i+1); for(let ep=1;ep<=s.eps;ep++) if(!existing.has(ep)) s.history.push({ep,ts:now}); }
+  else{ s.doneEps=[]; s.history=[]; }
+  save(); render();
+}
+function togglePanel(id,si){ if(!openPanels[id]) openPanels[id]=new Set(); if(openPanels[id].has(si)) openPanels[id].delete(si); else openPanels[id].add(si); render(); }
+function openHistory(id){
+  const it=items.find(i=>i.id===id);
+  document.getElementById('history-title').innerHTML=`Histórico — ${it.title} <button class="icon-btn" onclick="closeHistory()" style="margin-left:auto"><i class="ti ti-x"></i></button>`;
+  const entries=[];
+  (it.seasonList||[]).forEach((s,si)=>{ (s.history||[]).forEach(h=>entries.push({label:`T${si+1} · Ep ${h.ep}`,ts:h.ts})); });
+  entries.sort((a,b)=>b.ts-a.ts);
+  document.getElementById('history-body').innerHTML=entries.length?entries.map(e=>`<div class="history-entry"><span>${e.label}</span><span class="he-date">${fmtDate(e.ts)}</span></div>`).join(''):'<div style="color:var(--text3);font-size:13px;padding:1rem 0;text-align:center">Sem histórico ainda.</div>';
+  document.getElementById('history-modal').classList.add('open');
+}
+function closeHistory(){ document.getElementById('history-modal').classList.remove('open'); }
+
+// ── Drag ──
+function onDragStart(e,id){ dragId=id; e.currentTarget.classList.add('dragging'); }
+function onDragEnd(e){ e.currentTarget.classList.remove('dragging'); dragId=null; }
+function onDragOver(e,id){ e.preventDefault(); document.querySelectorAll('.card').forEach(c=>c.classList.remove('drag-over')); if(dragId&&dragId!==id) e.currentTarget.classList.add('drag-over'); }
+function onDrop(e,id){ e.preventDefault(); e.currentTarget.classList.remove('drag-over'); if(!dragId||dragId===id) return; const from=items.findIndex(i=>i.id===dragId), to=items.findIndex(i=>i.id===id); if(from<0||to<0) return; const[moved]=items.splice(from,1); items.splice(to,0,moved); document.getElementById('sort-select').value='manual'; save(); render(); }
+
+// ── View ──
+function setTypeFilter(f,btn){ typeFilter=f; document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); render(); }
+function toggleView(){ document.getElementById('grid').classList.toggle('list-view',document.getElementById('view-select').value==='list'); }
+
+// ── Render ──
+function render(){
+  const q=(document.getElementById('search').value||'').toLowerCase();
+  const sortVal=document.getElementById('sort-select').value;
+  const getProgress=it=>{ if(it.type!=='series'||!it.seasonList||!it.seasonList.length) return 0; const t=it.seasonList.reduce((a,s)=>a+s.eps,0); const d=it.seasonList.reduce((a,s)=>a+(s.doneEps||[]).length,0); return t?d/t:0; };
+  let visible=[...items].filter(i=>{
+    if(typeFilter==='series'&&i.type!=='series') return false;
+    if(typeFilter==='movie'&&i.type!=='movie') return false;
+    if(typeFilter==='fav'&&!i.fav) return false;
+    if(catFilter!==null&&i.category!==catFilter) return false;
+    if(q&&!i.title.toLowerCase().includes(q)&&!(i.notes||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+  if(sortVal==='name') visible.sort((a,b)=>a.title.localeCompare(b.title,'pt'));
+  else if(sortVal==='name-desc') visible.sort((a,b)=>b.title.localeCompare(a.title,'pt'));
+  else if(sortVal==='added') visible.sort((a,b)=>(b.addedAt||0)-(a.addedAt||0));
+  else if(sortVal==='added-asc') visible.sort((a,b)=>(a.addedAt||0)-(b.addedAt||0));
+  else if(sortVal==='progress') visible.sort((a,b)=>getProgress(b)-getProgress(a));
+  else if(sortVal==='progress-asc') visible.sort((a,b)=>getProgress(a)-getProgress(b));
+
+  const totalEpsAll=items.filter(i=>i.type==='series').reduce((a,it)=>(it.seasonList||[]).reduce((b,s)=>b+(s.doneEps||[]).length,a),0);
+  const totalEpsPoss=items.filter(i=>i.type==='series').reduce((a,it)=>(it.seasonList||[]).reduce((b,s)=>b+s.eps,a),0);
+  document.getElementById('s-total').textContent=items.length;
+  document.getElementById('s-total-sub').textContent=`${items.filter(i=>i.status==='watching').length} a ver`;
+  document.getElementById('s-series').textContent=items.filter(i=>i.type==='series').length;
+  document.getElementById('s-series-sub').textContent=`${items.filter(i=>i.type==='series'&&i.status==='done').length} concluídas`;
+  document.getElementById('s-movies').textContent=items.filter(i=>i.type==='movie').length;
+  document.getElementById('s-eps').textContent=totalEpsAll;
+  document.getElementById('s-eps-sub').textContent=`de ${totalEpsPoss} totais`;
+
+  const g=document.getElementById('grid');
+  if(!visible.length){ g.innerHTML=`<div class="empty"><i class="ti ti-mood-empty"></i><strong>Nada aqui</strong><p>${q?'Nenhum resultado para "'+q+'"':'Adiciona um título para começar!'}</p></div>`; return; }
+
+  g.innerHTML=visible.map(it=>{
+    const pct=Math.round(getProgress(it)*100);
+    const badgeClass=it.type==='series'?'badge-series':'badge-movie';
+    const badgeLabel=it.type==='series'?'Série':'Filme';
+    const status=it.status||'towatch';
+    const panels=openPanels[it.id]||new Set();
+    let seasonsHtml='';
+    if(it.type==='series'&&it.seasonList&&it.seasonList.length>0){
+      const totalEps=it.seasonList.reduce((a,s)=>a+s.eps,0);
+      const doneEps=it.seasonList.reduce((a,s)=>a+(s.doneEps||[]).length,0);
+      const blocks=it.seasonList.map((s,si)=>{
+        const done=s.doneEps||[]; const allDone=s.eps>0&&done.length===s.eps; const isOpen=panels.has(si);
+        const lastSeen=(s.history||[]).length?fmtDateShort([...s.history].sort((a,b)=>b.ts-a.ts)[0].ts):'';
+        const epPills=Array.from({length:s.eps},(_,ei)=>{ const ep=ei+1,isDone=done.includes(ep); return `<span class="ep-pill${isDone?' done':''}" onclick="event.stopPropagation();toggleEp('${it.id}',${si},${ep})">Ep ${ep}</span>`; }).join('');
+        return `<div class="season-block"><div class="season-header" onclick="togglePanel('${it.id}',${si})"><div class="season-header-left"><div class="season-check${allDone?' done':''}" onclick="event.stopPropagation();markAllEps('${it.id}',${si},${!allDone})"></div>Temporada ${si+1}</div><div class="season-header-right">${done.length}/${s.eps}${lastSeen?` · ${lastSeen}`:''}<i class="ti ti-chevron-down chevron${isOpen?' open':''}"></i></div></div><div class="season-eps${isOpen?' open':''}"><div class="ep-actions"><button class="ep-action-btn" onclick="markAllEps('${it.id}',${si},true)">Marcar todos</button><button class="ep-action-btn" onclick="markAllEps('${it.id}',${si},false)">Limpar</button><button class="ep-action-btn" style="margin-left:auto" onclick="openHistory('${it.id}')"><i class="ti ti-history" style="font-size:12px"></i> Histórico</button></div><div class="ep-grid">${epPills}</div></div></div>`;
+      }).join('');
+      seasonsHtml=`<div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div><div class="progress-label"><span>${doneEps}/${totalEps} eps</span><span>${pct}%</span></div>${blocks}`;
+    }
+    const catLabel=it.category?`<div class="card-cat"><i class="ti ti-folder" style="font-size:11px"></i>${it.category}</div>`:'';
+    const notesHtml=it.notes?`<div class="card-notes">${it.notes.replace(/</g,'&lt;')}</div>`:'';
+    return `<div class="card" draggable="true" ondragstart="onDragStart(event,'${it.id}')" ondragend="onDragEnd(event)" ondragover="onDragOver(event,'${it.id}')" ondrop="onDrop(event,'${it.id}')"><i class="ti ti-grip-vertical drag-handle"></i><div class="card-top"><div class="card-top-left"><span class="badge ${badgeClass}">${badgeLabel}</span><span class="status-badge ${STATUS_CLASS[status]}">${STATUS_LABEL[status]}</span></div><div class="card-actions"><button class="icon-btn${it.fav?' fav-on':''}" onclick="toggleFav('${it.id}')"><i class="ti ti-star${it.fav?'-filled':''}"></i></button><button class="icon-btn" onclick="openModal('${it.id}')"><i class="ti ti-edit"></i></button><button class="icon-btn" onclick="remove('${it.id}')"><i class="ti ti-trash"></i></button></div></div><div class="card-title">${it.title}</div>${catLabel}${notesHtml}${seasonsHtml}</div>`;
+  }).join('');
+}
+
+load(); renderCats(); render();
+</script>
+</body>
+</html>
