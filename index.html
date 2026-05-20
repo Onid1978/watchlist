@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json"/>
 <link rel="apple-touch-icon" href="icon-192.png"/>
 <link rel="icon" href="icon-192.png"/>
-<title>Watchlist</title>
+<title>BP Watchlist</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -28,30 +28,34 @@
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:5rem}
 
-/* LOGIN SCREEN */
-#login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;text-align:center}
-.login-logo{width:72px;height:72px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:1.5rem}
-#login-screen h1{font-size:28px;font-weight:700;letter-spacing:-.03em;margin-bottom:.5rem}
-#login-screen p{color:var(--text2);font-size:15px;margin-bottom:2rem}
-.google-btn{display:inline-flex;align-items:center;gap:10px;padding:12px 24px;border-radius:var(--radius-lg);font-size:15px;font-weight:600;cursor:pointer;border:1px solid var(--border-hi);background:var(--surface);color:var(--text);transition:all .15s}
-.google-btn:hover{background:var(--surface2);transform:translateY(-1px);box-shadow:var(--shadow)}
-.google-btn img{width:20px;height:20px}
-.login-footer{margin-top:1.5rem;font-size:12px;color:var(--text3)}
+/* ── LOGIN ── */
+#login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(167,139,250,.12) 0%,transparent 70%)}
+.bp-logo{width:88px;height:88px;border-radius:24px;background:linear-gradient(135deg,#a78bfa,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:#fff;letter-spacing:-.04em;margin-bottom:1.5rem;box-shadow:0 8px 32px rgba(167,139,250,.35);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+#login-screen h1{font-size:26px;font-weight:700;letter-spacing:-.03em;margin-bottom:.4rem}
+#login-screen .subtitle{color:var(--text2);font-size:14px;margin-bottom:2rem}
 
-/* SYNC STATUS */
+.login-box{background:var(--surface);border:1px solid var(--border-med);border-radius:var(--radius-xl);padding:2rem;width:100%;max-width:360px;box-shadow:var(--shadow)}
+.login-field{margin-bottom:14px;text-align:left}
+.login-field label{font-size:11px;color:var(--text2);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.login-field input{width:100%;padding:10px 13px;font-size:14px;border:1px solid var(--border-med);border-radius:var(--radius);background:var(--surface2);color:var(--text);outline:none;font-family:inherit;transition:all .15s}
+.login-field input:focus{border-color:var(--accent-border);box-shadow:0 0 0 3px var(--accent-dim)}
+.login-btn{width:100%;padding:11px;border-radius:var(--radius);font-size:15px;font-weight:700;cursor:pointer;border:none;background:linear-gradient(135deg,#a78bfa,#7c3aed);color:#fff;margin-top:6px;transition:all .15s;letter-spacing:-.01em}
+.login-btn:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 4px 16px rgba(167,139,250,.4)}
+.login-btn:active{transform:translateY(0)}
+.login-error{color:var(--red);font-size:13px;margin-top:10px;min-height:20px;text-align:center}
+.login-footer{margin-top:1.25rem;font-size:12px;color:var(--text3)}
+
+/* ── TOPBAR ── */
+.topbar{background:rgba(14,14,16,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:.75rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:60;gap:12px}
+.topbar-brand{display:flex;align-items:center;gap:10px}
+.topbar-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#a78bfa,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;letter-spacing:-.03em;flex-shrink:0}
+.topbar-brand h1{font-size:17px;font-weight:700;letter-spacing:-.03em}
+.topbar-right{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+
 #sync-status{font-size:12px;color:var(--text3);display:flex;align-items:center;gap:5px}
 #sync-status.syncing{color:var(--yellow)}
 #sync-status.synced{color:var(--green)}
 #sync-status.error{color:var(--red)}
-
-/* TOPBAR */
-.topbar{background:rgba(14,14,16,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:.9rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:60;gap:12px}
-.topbar-brand{display:flex;align-items:center;gap:10px}
-.topbar-brand .logo{width:32px;height:32px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px}
-.topbar-brand h1{font-size:17px;font-weight:700;letter-spacing:-.03em}
-.topbar-right{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
-.user-chip{display:flex;align-items:center;gap:7px;padding:5px 10px;border-radius:20px;border:1px solid var(--border-med);background:var(--surface2);font-size:12px;color:var(--text2)}
-.user-chip img{width:22px;height:22px;border-radius:50%}
 
 .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border-med);background:var(--surface2);color:var(--text2);transition:all .15s;white-space:nowrap}
 .btn:hover{background:var(--surface3);color:var(--text);border-color:var(--border-hi)}
@@ -59,6 +63,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn.primary:hover{opacity:.88}
 .btn i{font-size:15px}
 
+/* ── MAIN ── */
 .main{max-width:1120px;margin:0 auto;padding:1.5rem 2rem}
 
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.75rem}
@@ -189,33 +194,41 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .search-wrap{order:-1;width:100%}
   .search-input{width:100%}
   .btn span{display:none}
+  .topbar-brand h1{font-size:15px}
 }
 </style>
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
+<!-- LOGIN -->
 <div id="login-screen">
-  <div class="login-logo">🎬</div>
-  <h1>Watchlist</h1>
-  <p>A tua lista de filmes e séries,<br>sincronizada em todos os dispositivos</p>
-  <button class="google-btn" onclick="loginGoogle()">
-    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"/>
-    Entrar com Google
-  </button>
-  <p class="login-footer">Os teus dados ficam guardados de forma segura na cloud do Google</p>
+  <div class="bp-logo">BP</div>
+  <h1>BP Watchlist</h1>
+  <p class="subtitle">A tua lista de filmes e séries</p>
+  <div class="login-box">
+    <div class="login-field">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="o teu email" autocomplete="email"/>
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <button class="login-btn" onclick="loginEmail()">Entrar</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+  <p class="login-footer">Acesso privado — só para ti</p>
 </div>
 
 <!-- APP -->
 <div id="app" style="display:none">
   <div class="topbar">
     <div class="topbar-brand">
-      <div class="logo">🎬</div>
+      <div class="topbar-logo">BP</div>
       <h1>Watchlist</h1>
     </div>
     <div class="topbar-right">
       <div id="sync-status"><i class="ti ti-cloud-check"></i> Sincronizado</div>
-      <div class="user-chip" id="user-chip"></div>
       <button class="btn" onclick="exportJSON()"><i class="ti ti-download"></i><span> Exportar</span></button>
       <label class="btn" style="cursor:pointer"><i class="ti ti-upload"></i><span> Importar</span><input type="file" accept=".json" onchange="importJSON(event)" style="display:none"/></label>
       <button class="btn primary" onclick="openModal()"><i class="ti ti-plus"></i><span> Adicionar</span></button>
@@ -325,8 +338,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <!-- Firebase -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, doc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyC1S1TonvZDmh1Mn0n5wE_gkXaO31biMZQ",
@@ -340,18 +353,26 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
-let currentUser = null;
 let unsubscribe = null;
 let saveTimeout = null;
 
-// ── Auth ──
-window.loginGoogle = async () => {
+window.loginEmail = async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+  errEl.textContent = '';
+  if(!email || !pass){ errEl.textContent = 'Preenche o email e a password.'; return; }
   try {
-    const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    await signInWithEmailAndPassword(auth, email, pass);
   } catch(e) {
-    toast('Erro ao entrar: ' + e.message);
+    const msgs = {
+      'auth/invalid-credential': 'Email ou password incorretos.',
+      'auth/user-not-found': 'Utilizador não encontrado.',
+      'auth/wrong-password': 'Password incorreta.',
+      'auth/too-many-requests': 'Muitas tentativas. Tenta mais tarde.',
+      'auth/invalid-email': 'Email inválido.'
+    };
+    errEl.textContent = msgs[e.code] || 'Erro ao entrar. Tenta novamente.';
   }
 };
 
@@ -359,27 +380,27 @@ window.logoutUser = async () => {
   if(!confirm('Sair da conta?')) return;
   if(unsubscribe) unsubscribe();
   await signOut(auth);
+  items = []; categories = ['A ver agora','Em pausa','Para depois'];
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
-  items = []; categories = ['A ver agora','Em pausa','Para depois'];
+  document.getElementById('login-pass').value = '';
   toast('Sessão terminada.');
 };
 
+document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key === 'Enter') window.loginEmail(); });
+document.getElementById('login-email').addEventListener('keydown', e => { if(e.key === 'Enter') document.getElementById('login-pass').focus(); });
+
 onAuthStateChanged(auth, user => {
   if(user) {
-    currentUser = user;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
-    document.getElementById('user-chip').innerHTML = `${user.photoURL ? `<img src="${user.photoURL}" alt=""/>` : ''}<span>${user.displayName || user.email}</span>`;
-    startSync();
+    startSync(user.uid);
   } else {
-    currentUser = null;
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
   }
 });
 
-// ── Firestore sync ──
 function setSyncStatus(s) {
   const el = document.getElementById('sync-status');
   const icons = { syncing:'ti-cloud-upload', synced:'ti-cloud-check', error:'ti-cloud-off' };
@@ -388,9 +409,9 @@ function setSyncStatus(s) {
   el.innerHTML = `<i class="ti ${icons[s]}"></i> ${labels[s]}`;
 }
 
-function startSync() {
+function startSync(uid) {
   if(unsubscribe) unsubscribe();
-  const ref = doc(db, 'users', currentUser.uid);
+  const ref = doc(db, 'users', uid);
   unsubscribe = onSnapshot(ref, snap => {
     if(snap.exists()) {
       const data = snap.data();
@@ -403,34 +424,27 @@ function startSync() {
   }, () => setSyncStatus('error'));
 }
 
-window.saveToFirestore = () => {
-  if(!currentUser) return;
+window._save = () => {
+  const uid = auth.currentUser?.uid; if(!uid) return;
   clearTimeout(saveTimeout);
   setSyncStatus('syncing');
   saveTimeout = setTimeout(async () => {
     try {
-      await setDoc(doc(db, 'users', currentUser.uid), { items, categories, updatedAt: Date.now() });
+      await setDoc(doc(db, 'users', uid), { items, categories, updatedAt: Date.now() });
       setSyncStatus('synced');
     } catch(e) {
       setSyncStatus('error');
-      toast('Erro ao guardar: ' + e.message);
     }
   }, 800);
 };
-
-// override save
-window._save = window.saveToFirestore;
 </script>
 
 <script>
-// ── PWA ──
 if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 
-// ── State ──
-let items = [], categories = ['A ver agora','Em pausa','Para depois'];
-let typeFilter = 'all', catFilter = null, dragId = null, openPanels = {};
+let items=[], categories=['A ver agora','Em pausa','Para depois'];
+let typeFilter='all', catFilter=null, dragId=null, openPanels={};
 
-// ── Helpers ──
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2); }
 function fmtDate(ts){ if(!ts) return ''; return new Date(ts).toLocaleDateString('pt-PT',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
 function fmtDateShort(ts){ if(!ts) return ''; return new Date(ts).toLocaleDateString('pt-PT',{day:'2-digit',month:'short'}); }
@@ -444,7 +458,6 @@ function save(){ if(window._save) window._save(); }
 const STATUS_LABEL={towatch:'Para ver',watching:'A ver',paused:'Em pausa',done:'Concluído',dropped:'Abandonado'};
 const STATUS_CLASS={towatch:'sb-towatch',watching:'sb-watching',paused:'sb-paused',done:'sb-done',dropped:'sb-dropped'};
 
-// ── Export / Import ──
 function exportJSON(){
   if(!items.length){ toast('Não há nada para exportar!'); return; }
   const blob=new Blob([JSON.stringify({items,categories,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});
@@ -469,7 +482,6 @@ function importJSON(e){
   reader.readAsText(file); e.target.value='';
 }
 
-// ── Categories ──
 function renderCats(){
   document.getElementById('cat-bar').innerHTML=`
     <button class="cat-chip${catFilter===null?' active':''}" onclick="setCatFilter(null)">Todas</button>
@@ -496,7 +508,6 @@ function populateCatSelect(){
   document.getElementById('f-cat').innerHTML=`<option value="">— Sem categoria —</option>${categories.map(c=>`<option value="${c}">${c}</option>`).join('')}`;
 }
 
-// ── Modal ──
 function addSeasonRow(eps){
   const container=document.getElementById('seasons-config');
   const idx=container.querySelectorAll('.season-row').length;
@@ -562,7 +573,6 @@ function saveItem(){
   save(); closeModal(); render();
 }
 
-// ── Actions ──
 function remove(id){ const it=items.find(i=>i.id===id); if(!confirm(`Remover "${it.title}"?`)) return; items=items.filter(i=>i.id!==id); delete openPanels[id]; save(); render(); toast('Removido.'); }
 function toggleFav(id){ const it=items.find(i=>i.id===id); it.fav=!it.fav; save(); render(); }
 function toggleEp(id,si,ep){
@@ -590,17 +600,14 @@ function openHistory(id){
 }
 function closeHistory(){ document.getElementById('history-modal').classList.remove('open'); }
 
-// ── Drag ──
 function onDragStart(e,id){ dragId=id; e.currentTarget.classList.add('dragging'); }
 function onDragEnd(e){ e.currentTarget.classList.remove('dragging'); dragId=null; }
 function onDragOver(e,id){ e.preventDefault(); document.querySelectorAll('.card').forEach(c=>c.classList.remove('drag-over')); if(dragId&&dragId!==id) e.currentTarget.classList.add('drag-over'); }
 function onDrop(e,id){ e.preventDefault(); e.currentTarget.classList.remove('drag-over'); if(!dragId||dragId===id) return; const from=items.findIndex(i=>i.id===dragId), to=items.findIndex(i=>i.id===id); if(from<0||to<0) return; const[moved]=items.splice(from,1); items.splice(to,0,moved); document.getElementById('sort-select').value='manual'; save(); render(); }
 
-// ── Filter / View ──
 function setTypeFilter(f,btn){ typeFilter=f; document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); render(); }
 function toggleView(){ document.getElementById('grid').classList.toggle('list-view',document.getElementById('view-select').value==='list'); }
 
-// ── Render ──
 function render(){
   const q=(document.getElementById('search').value||'').toLowerCase();
   const sortVal=document.getElementById('sort-select').value;
