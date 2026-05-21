@@ -210,6 +210,37 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
 
+/* DETAIL MODAL */
+.detail-modal{background:var(--surface);border:1px solid var(--border-med);border-radius:var(--radius-xl);width:680px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.7);display:flex;flex-direction:column}
+.detail-hero{display:flex;gap:0;position:relative}
+.detail-poster{width:200px;min-width:200px;object-fit:cover;border-radius:var(--radius-xl) 0 0 0;flex-shrink:0}
+.detail-poster-placeholder{width:200px;min-width:200px;background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:60px;border-radius:var(--radius-xl) 0 0 0;min-height:280px}
+.detail-hero-info{flex:1;padding:1.5rem;background:linear-gradient(135deg,var(--surface2),var(--surface));display:flex;flex-direction:column;justify-content:flex-end;border-radius:0 var(--radius-xl) 0 0}
+.detail-close{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.5);border:none;cursor:pointer;color:#fff;padding:6px;border-radius:8px;display:flex;align-items:center;font-size:18px;transition:background .15s}
+.detail-close:hover{background:rgba(0,0,0,.8)}
+.detail-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.detail-title{font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.03em;margin-bottom:4px;line-height:1.2}
+.detail-meta{font-size:13px;color:var(--text2);margin-bottom:12px}
+.detail-actions{display:flex;gap:8px;flex-wrap:wrap}
+.detail-body{padding:1.25rem 1.5rem}
+.detail-section{margin-bottom:1.25rem}
+.detail-section-title{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:8px}
+.detail-notes{font-size:13px;color:var(--text2);line-height:1.6;font-style:italic;border-left:2px solid var(--accent-border);padding-left:10px}
+.detail-progress-bar{height:6px;background:var(--surface3);border-radius:4px;margin-bottom:6px;overflow:hidden}
+.detail-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:4px;transition:width .4s}
+.detail-progress-label{font-size:12px;color:var(--text2);margin-bottom:12px;display:flex;justify-content:space-between}
+.detail-season-block{margin-bottom:6px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.detail-season-header{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;cursor:pointer;background:var(--surface2);gap:8px;transition:background .15s}
+.detail-season-header:hover{background:var(--surface3)}
+.detail-season-eps{display:none;padding:10px 12px;background:var(--surface)}
+.detail-season-eps.open{display:block}
+@media(max-width:600px){
+  .detail-hero{flex-direction:column}
+  .detail-poster,.detail-poster-placeholder{width:100%;min-width:unset;border-radius:var(--radius-xl) var(--radius-xl) 0 0;max-height:240px}
+  .detail-hero-info{border-radius:0}
+  .detail-modal{width:100%;max-width:100vw;border-radius:var(--radius-xl) var(--radius-xl) 0 0;position:fixed;bottom:0;max-height:90vh}
+}
+
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
@@ -368,6 +399,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <button class="btn primary" onclick="saveCategory()">Criar</button>
     </div>
   </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-bg" id="detail-modal" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-modal" id="detail-content"></div>
 </div>
 
 <div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg"></span></div>
@@ -728,6 +764,90 @@ function onDrop(e,id){ e.preventDefault(); e.currentTarget.classList.remove('dra
 function setTypeFilter(f,btn){ typeFilter=f; document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); render(); }
 function toggleView(){ document.getElementById('grid').classList.toggle('list-view',document.getElementById('view-select').value==='list'); }
 
+function openDetail(id){
+  const it=items.find(i=>i.id===id); if(!it) return;
+  const pct=Math.round((()=>{ if(it.type!=='series'||!it.seasonList||!it.seasonList.length) return 0; const t=it.seasonList.reduce((a,s)=>a+s.eps,0); const d=it.seasonList.reduce((a,s)=>a+(s.doneEps||[]).length,0); return t?d/t:0; })()*100);
+  const status=it.status||'towatch';
+  const totalEps=it.type==='series'?(it.seasonList||[]).reduce((a,s)=>a+s.eps,0):0;
+  const doneEps=it.type==='series'?(it.seasonList||[]).reduce((a,s)=>a+(s.doneEps||[]).length,0):0;
+
+  const posterHtml=it.poster
+    ?`<img class="detail-poster" src="${it.poster}" alt="${it.title}"/>`
+    :`<div class="detail-poster-placeholder"><i class="ti ti-${it.type==='series'?'device-tv':'movie'}"></i></div>`;
+
+  const seasonsHtml=it.type==='series'&&it.seasonList&&it.seasonList.length>0?`
+    <div class="detail-section">
+      <div class="detail-section-title">Temporadas</div>
+      <div class="detail-progress-bar"><div class="detail-progress-fill" style="width:${pct}%"></div></div>
+      <div class="detail-progress-label"><span>${doneEps}/${totalEps} episódios vistos</span><span>${pct}%</span></div>
+      ${it.seasonList.map((s,si)=>{
+        const done=s.doneEps||[]; const allDone=s.eps>0&&done.length===s.eps;
+        const lastSeen=(s.history||[]).length?fmtDateShort([...s.history].sort((a,b)=>b.ts-a.ts)[0].ts):'';
+        const epPills=Array.from({length:s.eps},(_,ei)=>{ const ep=ei+1,isDone=done.includes(ep); return `<span class="ep-pill${isDone?' done':''}" onclick="event.stopPropagation();toggleEpDetail('${it.id}',${si},${ep})">Ep ${ep}</span>`; }).join('');
+        return `<div class="detail-season-block">
+          <div class="detail-season-header" onclick="toggleDetailPanel(this)">
+            <div class="season-header-left"><div class="season-check${allDone?' done':''}" onclick="event.stopPropagation();markAllEpsDetail('${it.id}',${si},${!allDone})"></div>Temporada ${si+1}</div>
+            <div class="season-header-right">${done.length}/${s.eps}${lastSeen?` · ${lastSeen}`:''}<i class="ti ti-chevron-down chevron"></i></div>
+          </div>
+          <div class="detail-season-eps">
+            <div class="ep-actions">
+              <button class="ep-action-btn" onclick="markAllEpsDetail('${it.id}',${si},true)">Marcar todos</button>
+              <button class="ep-action-btn" onclick="markAllEpsDetail('${it.id}',${si},false)">Limpar</button>
+            </div>
+            <div class="ep-grid">${epPills}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`:'';
+
+  const notesHtml=it.notes?`<div class="detail-section"><div class="detail-section-title">Notas</div><div class="detail-notes">${it.notes.replace(/</g,'&lt;')}</div></div>`:'';
+  const catHtml=it.category?`<span style="font-size:12px;color:var(--text3)"><i class="ti ti-folder" style="font-size:11px"></i> ${it.category}</span>`:'';
+
+  document.getElementById('detail-content').innerHTML=`
+    <div class="detail-hero">
+      ${posterHtml}
+      <div class="detail-hero-info">
+        <div class="detail-badges">
+          <span class="badge ${it.type==='series'?'badge-series':'badge-movie'}">${it.type==='series'?'Série':'Filme'}</span>
+          <span class="status-badge ${STATUS_CLASS[status]}">${STATUS_LABEL[status]}</span>
+          ${it.fav?'<span class="status-badge" style="background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(251,191,36,.3)">⭐ Favorito</span>':''}
+        </div>
+        <div class="detail-title">${it.title}</div>
+        <div class="detail-meta">${[it.year,catHtml,it.type==='series'&&it.seasonList?it.seasonList.length+' temporadas':''].filter(Boolean).join(' · ')}</div>
+        <div class="detail-actions">
+          <button class="btn primary" onclick="closeDetail();openModal('${it.id}')"><i class="ti ti-edit"></i> Editar</button>
+          <button class="btn" onclick="closeDetail();openHistory('${it.id}')"><i class="ti ti-history"></i> Histórico</button>
+          <button class="btn" onclick="closeDetail();remove('${it.id}')"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+      <button class="detail-close" onclick="closeDetail()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="detail-body">
+      ${notesHtml}
+      ${seasonsHtml}
+    </div>`;
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+function closeDetail(){ document.getElementById('detail-modal').classList.remove('open'); }
+
+function toggleDetailPanel(header){
+  const eps=header.nextElementSibling;
+  const chevron=header.querySelector('.chevron');
+  const isOpen=eps.classList.contains('open');
+  eps.classList.toggle('open',!isOpen);
+  chevron.classList.toggle('open',!isOpen);
+}
+
+function toggleEpDetail(id,si,ep){
+  toggleEp(id,si,ep);
+  openDetail(id);
+}
+function markAllEpsDetail(id,si,doMark){
+  markAllEps(id,si,doMark);
+  openDetail(id);
+}
+
 function render(){
   const q=(document.getElementById('search').value||'').toLowerCase();
   const sortVal=document.getElementById('sort-select').value;
@@ -781,8 +901,8 @@ function render(){
     }
 
     const posterHtml=it.poster
-      ?`<img class="card-poster" src="${it.poster}" alt="${it.title}" loading="lazy"/>`
-      :`<div class="card-poster-placeholder"><i class="ti ti-${it.type==='series'?'device-tv':'movie'}"></i></div>`;
+      ?`<img class="card-poster" src="${it.poster}" alt="${it.title}" loading="lazy" onclick="openDetail('${it.id}')" style="cursor:pointer"/>`
+      :`<div class="card-poster-placeholder" onclick="openDetail('${it.id}')" style="cursor:pointer"><i class="ti ti-${it.type==='series'?'device-tv':'movie'}"></i></div>`;
     const catLabel=it.category?`<div class="card-cat"><i class="ti ti-folder" style="font-size:10px"></i>${it.category}</div>`:'';
     const notesHtml=it.notes?`<div class="card-notes">${it.notes.slice(0,80).replace(/</g,'&lt;')}${it.notes.length>80?'...':''}</div>`:'';
     const yearHtml=it.year?`<div class="card-year">${it.year}</div>`:'';
