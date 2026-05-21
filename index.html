@@ -548,7 +548,7 @@ async function tmdbSelect(id, type){
 
     // Fill form
     document.getElementById('f-title').value = title;
-    if(overview && !document.getElementById('f-notes').value) document.getElementById('f-notes').value = overview.slice(0,200);
+    if(overview && !document.getElementById('f-notes').value) document.getElementById('f-notes').value = overview;
 
     // Fill seasons for TV
     if(type==='series' && data.seasons){
@@ -800,7 +800,7 @@ function openDetail(id){
       }).join('')}
     </div>`:'';
 
-  const notesHtml=it.notes?`<div class="detail-section"><div class="detail-section-title">Notas</div><div class="detail-notes">${it.notes.replace(/</g,'&lt;')}</div></div>`:'';
+  const notesHtml=it.notes?`<div class="detail-section"><div class="detail-section-title">Sinopse / Notas</div><div class="detail-notes">${it.notes.replace(/</g,'&lt;')}</div></div>`:'';
   const catHtml=it.category?`<span style="font-size:12px;color:var(--text3)"><i class="ti ti-folder" style="font-size:11px"></i> ${it.category}</span>`:'';
 
   document.getElementById('detail-content').innerHTML=`
