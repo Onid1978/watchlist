@@ -920,7 +920,8 @@ function render(){
           </div>
         </div>
         <div class="card-title">${it.title}</div>
-        ${yearHtml}${catLabel}${notesHtml}${seasonsHtml}
+        ${yearHtml}${catLabel}
+        ${it.type==='series'&&it.seasonList&&it.seasonList.length>0?`<div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div><div class="progress-label"><span>${it.seasonList.reduce((a,s)=>a+(s.doneEps||[]).length,0)}/${it.seasonList.reduce((a,s)=>a+s.eps,0)} eps</span><span>${pct}%</span></div>`:''}
       </div>
     </div>`;
   }).join('');
