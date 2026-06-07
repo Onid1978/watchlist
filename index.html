@@ -723,6 +723,11 @@ function saveItem(){
     Object.assign(it,{title,type,status,category,notes,fav,poster,tmdbId,year});
     toast('Título atualizado!');
   }else{
+    // Check for duplicates
+    const duplicate = items.find(i => i.title.toLowerCase().trim() === title.toLowerCase().trim());
+    if(duplicate){
+      if(!confirm(`"${title}" já existe na tua lista (${STATUS_LABEL[duplicate.status||'towatch']}). Queres adicionar mesmo assim?`)) return;
+    }
     items.push({id:uid(),title,type,status,category,notes,fav,poster,tmdbId,year,seasonList:newSeasons.map(s=>({eps:s.eps,doneEps:[],history:[]})),addedAt:Date.now()});
     toast(`"${title}" adicionado!`);
   }
