@@ -26,7 +26,18 @@
   --radius:10px;--radius-lg:14px;--radius-xl:18px;
   --shadow:0 4px 24px rgba(0,0,0,.45);
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:5rem}
+:root.light{
+  --bg:#f4f4f5;--surface:#ffffff;--surface2:#f0f0f2;--surface3:#e4e4e7;
+  --border:rgba(0,0,0,.08);--border-med:rgba(0,0,0,.14);--border-hi:rgba(0,0,0,.22);
+  --text:#18181b;--text2:#52525b;--text3:#a1a1aa;
+  --accent:#7c3aed;--accent-dim:rgba(124,58,237,.1);--accent-border:rgba(124,58,237,.3);
+  --green:#059669;--green-dim:rgba(5,150,105,.1);
+  --yellow:#d97706;--yellow-dim:rgba(217,119,6,.1);
+  --red:#dc2626;--red-dim:rgba(220,38,38,.1);
+  --blue:#2563eb;--blue-dim:rgba(37,99,235,.1);
+  --shadow:0 4px 24px rgba(0,0,0,.12);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:5rem;transition:background .2s,color .2s}
 
 /* LOGIN */
 #login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(167,139,250,.12) 0%,transparent 70%)}
@@ -93,15 +104,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
 .grid.list-view{grid-template-columns:1fr}
 
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;transition:border-color .15s,transform .1s,box-shadow .15s;cursor:default;position:relative}
+/* Card enter animation */
+@keyframes cardIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;transition:border-color .15s,transform .15s,box-shadow .15s,opacity .2s;cursor:default;position:relative;animation:cardIn .25s ease both}
 .card:hover{border-color:var(--border-med);transform:translateY(-2px);box-shadow:var(--shadow)}
 .card.dragging{opacity:.5;transform:scale(.97)}
 .card.drag-over{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
+@keyframes cardOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.95)}}
+.card.removing{animation:cardOut .2s ease forwards}
 
-/* POSTER */
+/* POSTER grid mode */
 .card-poster{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;background:var(--surface2)}
 .card-poster-placeholder{width:100%;aspect-ratio:2/3;background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:40px}
-.grid.list-view .card-poster,.grid.list-view .card-poster-placeholder{display:none}
+
+/* LIST VIEW */
+.grid.list-view .card{display:flex;flex-direction:row;align-items:stretch;border-radius:var(--radius-lg)}
+.grid.list-view .card-poster{width:60px;min-width:60px;height:90px;aspect-ratio:unset;border-radius:var(--radius-lg) 0 0 var(--radius-lg);flex-shrink:0}
+.grid.list-view .card-poster-placeholder{width:60px;min-width:60px;height:90px;aspect-ratio:unset;border-radius:var(--radius-lg) 0 0 var(--radius-lg);flex-shrink:0;font-size:22px}
+.grid.list-view .drag-handle{top:50%;transform:translateY(-50%)}
+.grid.list-view .card-body{flex:1;padding:.65rem .9rem;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.grid.list-view .card-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid.list-view .progress-bar{margin-bottom:3px}
+.grid.list-view .progress-label{margin-bottom:0}
 
 .card-body{padding:.9rem}
 .drag-handle{position:absolute;top:8px;left:4px;color:rgba(255,255,255,.5);cursor:grab;padding:4px;opacity:0;transition:opacity .15s;font-size:16px;z-index:2;text-shadow:0 1px 3px rgba(0,0,0,.8)}
@@ -282,9 +306,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
     <div class="topbar-right">
       <div id="sync-status"><i class="ti ti-cloud-check"></i> Sincronizado</div>
+      <button class="btn" onclick="tmdbRefreshAll()" title="Atualizar episódios via TMDB"><i class="ti ti-refresh"></i><span> Atualizar</span></button>
+      <button class="btn" onclick="toggleTheme()" id="theme-btn" title="Modo claro/escuro"><i class="ti ti-sun"></i></button>
       <button class="btn" onclick="exportJSON()"><i class="ti ti-download"></i><span> Exportar</span></button>
       <label class="btn" style="cursor:pointer"><i class="ti ti-upload"></i><span> Importar</span><input type="file" accept=".json" onchange="importJSON(event)" style="display:none"/></label>
       <button class="btn primary" onclick="openModal()"><i class="ti ti-plus"></i><span> Adicionar</span></button>
+      <button class="btn" onclick="clearAllData()" title="Limpar todos os dados"><i class="ti ti-trash"></i></button>
       <button class="btn" onclick="logoutUser()" title="Sair"><i class="ti ti-logout"></i></button>
     </div>
   </div>
@@ -734,7 +761,68 @@ function saveItem(){
   save(); closeModal(); render();
 }
 
-function remove(id){ const it=items.find(i=>i.id===id); if(!confirm(`Remover "${it.title}"?`)) return; items=items.filter(i=>i.id!==id); delete openPanels[id]; save(); render(); toast('Removido.'); }
+// ── Theme ──
+function toggleTheme(){
+  const isLight = document.documentElement.classList.toggle('light');
+  document.getElementById('theme-btn').innerHTML = isLight ? '<i class="ti ti-moon"></i>' : '<i class="ti ti-sun"></i>';
+  localStorage.setItem('wl_theme', isLight ? 'light' : 'dark');
+}
+function loadTheme(){
+  const t = localStorage.getItem('wl_theme');
+  if(t === 'light'){
+    document.documentElement.classList.add('light');
+    const btn = document.getElementById('theme-btn');
+    if(btn) btn.innerHTML = '<i class="ti ti-moon"></i>';
+  }
+}
+
+// ── TMDB Refresh All ──
+async function tmdbRefreshAll(){
+  const series = items.filter(i => i.type === 'series' && i.tmdbId);
+  if(!series.length){ toast('Nenhuma série com dados TMDB para atualizar.'); return; }
+  setSyncStatus('syncing');
+  let updated = 0;
+  for(const it of series){
+    try{
+      const res = await fetch(`https://api.themoviedb.org/3/tv/${it.tmdbId}?language=pt-PT`, {headers:{Authorization:`Bearer ${TMDB_TOKEN}`}});
+      const data = await res.json();
+      if(!data.seasons) continue;
+      const newSeasons = data.seasons.filter(s => s.season_number > 0);
+      let changed = false;
+      newSeasons.forEach((s, si) => {
+        if(!it.seasonList[si]){
+          it.seasonList.push({eps: s.episode_count, doneEps:[], history:[]});
+          changed = true;
+        } else if(it.seasonList[si].eps !== s.episode_count){
+          it.seasonList[si].eps = s.episode_count;
+          it.seasonList[si].doneEps = it.seasonList[si].doneEps.filter(ep => ep <= s.episode_count);
+          changed = true;
+        }
+      });
+      if(data.poster_path && !it.poster){
+        it.poster = `https://image.tmdb.org/t/p/w500${data.poster_path}`;
+        changed = true;
+      }
+      if(changed) updated++;
+    }catch(e){}
+  }
+  save(); render();
+  toast(updated > 0 ? `${updated} série(s) atualizadas!` : 'Tudo já está atualizado.');
+}
+
+function remove(id){
+  const it = items.find(i => i.id === id);
+  if(!confirm(`Remover "${it.title}"?`)) return;
+  // Animate out
+  const card = document.querySelector(`[data-id="${id}"]`);
+  if(card){
+    card.classList.add('removing');
+    setTimeout(()=>{ items = items.filter(i => i.id !== id); delete openPanels[id]; save(); render(); }, 200);
+  } else {
+    items = items.filter(i => i.id !== id); delete openPanels[id]; save(); render();
+  }
+  toast('Removido.');
+}
 function toggleFav(id){ const it=items.find(i=>i.id===id); it.fav=!it.fav; save(); render(); }
 function toggleEp(id,si,ep){
   const it=items.find(i=>i.id===id); const s=it.seasonList[si]; if(!s.history) s.history=[];
@@ -912,7 +1000,7 @@ function render(){
     const notesHtml=it.notes?`<div class="card-notes">${it.notes.slice(0,80).replace(/</g,'&lt;')}${it.notes.length>80?'...':''}</div>`:'';
     const yearHtml=it.year?`<div class="card-year">${it.year}</div>`:'';
 
-    return `<div class="card" draggable="true" ondragstart="onDragStart(event,'${it.id}')" ondragend="onDragEnd(event)" ondragover="onDragOver(event,'${it.id}')" ondrop="onDrop(event,'${it.id}')">
+    return `<div class="card" data-id="${it.id}" draggable="true" ondragstart="onDragStart(event,'${it.id}')" ondragend="onDragEnd(event)" ondragover="onDragOver(event,'${it.id}')" ondrop="onDrop(event,'${it.id}')">
       <i class="ti ti-grip-vertical drag-handle"></i>
       ${posterHtml}
       <div class="card-body">
@@ -931,6 +1019,15 @@ function render(){
     </div>`;
   }).join('');
 }
+
+function clearAllData(){
+  if(!confirm('Tens a certeza que queres apagar TODOS os filmes e séries?\n\nEsta ação não pode ser desfeita.')) return;
+  if(!confirm('Última confirmação — apagar tudo?')) return;
+  items = [];
+  save(); render(); toast('Todos os dados foram apagados.');
+}
+
+loadTheme();
 </script>
 </body>
 </html>
