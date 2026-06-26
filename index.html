@@ -799,45 +799,53 @@ function loadTheme(){
 
 // ── TMDB Refresh All ──
 async function tmdbRefreshAll(){
-  const series = items.filter(i => i.type === 'series' && i.tmdbId);
-  if(!series.length){ toast('Nenhuma série com dados TMDB para atualizar.'); return; }
+  const withTmdb = items.filter(i => i.tmdbId);
+  if(!withTmdb.length){ toast('Nenhum título com dados TMDB para atualizar.'); return; }
   setSyncStatus('syncing');
   let updated = 0;
-  for(const it of series){
+  for(const it of withTmdb){
     try{
-      const res = await fetch(`https://api.themoviedb.org/3/tv/${it.tmdbId}?language=pt-PT`, {headers:{Authorization:`Bearer ${TMDB_TOKEN}`}});
-      const data = await res.json();
-      if(!data.seasons) continue;
-      const newSeasons = data.seasons.filter(s => s.season_number > 0);
       let changed = false;
-      newSeasons.forEach((s, si) => {
-        if(!it.seasonList[si]){
-          it.seasonList.push({eps: s.episode_count, doneEps:[], history:[]});
-          changed = true;
-        } else if(it.seasonList[si].eps !== s.episode_count){
-          it.seasonList[si].eps = s.episode_count;
-          it.seasonList[si].doneEps = it.seasonList[si].doneEps.filter(ep => ep <= s.episode_count);
+      const mediaType = it.type==='series' ? 'tv' : 'movie';
+
+      if(it.type==='series'){
+        const res = await fetch(`https://api.themoviedb.org/3/tv/${it.tmdbId}?language=pt-PT`, {headers:{Authorization:`Bearer ${TMDB_TOKEN}`}});
+        const data = await res.json();
+        if(data.seasons){
+          const newSeasons = data.seasons.filter(s => s.season_number > 0);
+          newSeasons.forEach((s, si) => {
+            if(!it.seasonList[si]){
+              it.seasonList.push({eps: s.episode_count, doneEps:[], history:[]});
+              changed = true;
+            } else if(it.seasonList[si].eps !== s.episode_count){
+              it.seasonList[si].eps = s.episode_count;
+              it.seasonList[si].doneEps = it.seasonList[si].doneEps.filter(ep => ep <= s.episode_count);
+              changed = true;
+            }
+          });
+        }
+        if(data.poster_path && !it.poster){
+          it.poster = `https://image.tmdb.org/t/p/w500${data.poster_path}`;
           changed = true;
         }
-      });
-      if(data.poster_path && !it.poster){
-        it.poster = `https://image.tmdb.org/t/p/w500${data.poster_path}`;
-        changed = true;
       }
-      // fetch trailer if missing
-      if(!it.trailerId){
-        try{
-          const vRes = await fetch(`https://api.themoviedb.org/3/tv/${it.tmdbId}/videos`, {headers:{Authorization:`Bearer ${TMDB_TOKEN}`}});
-          const vData = await vRes.json();
-          const t = (vData.results||[]).find(v=>v.site==='YouTube'&&(v.type==='Trailer'||v.type==='Teaser'));
-          if(t){ it.trailerId = t.key; changed = true; }
-        }catch(e){}
-      }
+
+      // Always fetch trailer (force update)
+      try{
+        const vRes = await fetch(`https://api.themoviedb.org/3/${mediaType}/${it.tmdbId}/videos`, {headers:{Authorization:`Bearer ${TMDB_TOKEN}`}});
+        const vData = await vRes.json();
+        const results = vData.results || [];
+        const t = results.find(v=>v.site==='YouTube' && v.type==='Trailer') ||
+                  results.find(v=>v.site==='YouTube' && v.type==='Teaser') ||
+                  results.find(v=>v.site==='YouTube');
+        if(t && t.key !== it.trailerId){ it.trailerId = t.key; changed = true; }
+      }catch(e){}
+
       if(changed) updated++;
     }catch(e){}
   }
   save(); render();
-  toast(updated > 0 ? `${updated} série(s) atualizadas!` : 'Tudo já está atualizado.');
+  toast(updated > 0 ? `${updated} título(s) atualizados!` : 'Tudo já está atualizado.');
 }
 
 function remove(id){
