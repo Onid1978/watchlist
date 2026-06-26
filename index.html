@@ -493,13 +493,6 @@ onAuthStateChanged(auth, user => {
   }
 });
 
-function setSyncStatus(s){
-  const el=document.getElementById('sync-status');
-  const icons={syncing:'ti-cloud-upload',synced:'ti-cloud-check',error:'ti-cloud-off'};
-  const labels={syncing:'A sincronizar...',synced:'Sincronizado',error:'Erro de ligação'};
-  el.className=s; el.innerHTML=`<i class="ti ${icons[s]}"></i> ${labels[s]}`;
-}
-
 function startSync(uid){
   if(unsubscribe) unsubscribe();
   unsubscribe = onSnapshot(doc(db,'users',uid), snap => {
@@ -795,6 +788,14 @@ function loadTheme(){
     const btn = document.getElementById('theme-btn');
     if(btn) btn.innerHTML = '<i class="ti ti-moon"></i>';
   }
+}
+
+function setSyncStatus(s){
+  const el=document.getElementById('sync-status');
+  if(!el) return;
+  const icons={syncing:'ti-cloud-upload',synced:'ti-cloud-check',error:'ti-cloud-off'};
+  const labels={syncing:'A sincronizar...',synced:'Sincronizado',error:'Erro de ligação'};
+  el.className=s; el.innerHTML=`<i class="ti ${icons[s]}"></i> ${labels[s]}`;
 }
 
 // ── TMDB Refresh All ──
