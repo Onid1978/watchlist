@@ -571,7 +571,27 @@ async function tmdbSelect(id, type){
     const poster = data.poster_path?`${TMDB_IMG_FULL}${data.poster_path}`:'';
     const overview = data.overview||'';
 
-    tmdbSelected = { id, type, title, year, poster, overview, tmdbId: id };
+    // Fetch trailer
+    let trailerId = '';
+    try{
+      const vRes = await fetch(`https://api.themoviedb.org/3/${type==='series'?'tv':'movie'}/${id}/videos?language=pt-PT`, {headers:{Authorization:`Bearer ${TMDB_TOKEN}`}});
+      const vData = await vRes.json();
+      const trailers = (vData.results||[]).filter(v=>v.site==='YouTube'&&(v.type==='Trailer'||v.type==='Teaser'));
+      // prefer PT trailer, fallback to any
+      const ptTrailer = trailers.find(v=>v.iso_639_1==='pt');
+      const enTrailer = trailers[0];
+      const chosen = ptTrailer||enTrailer;
+      if(chosen) trailerId = chosen.key;
+      // fallback to english videos
+      if(!trailerId){
+        const vRes2 = await fetch(`https://api.themoviedb.org/3/${type==='series'?'tv':'movie'}/${id}/videos`, {headers:{Authorization:`Bearer ${TMDB_TOKEN}`}});
+        const vData2 = await vRes2.json();
+        const t2 = (vData2.results||[]).find(v=>v.site==='YouTube'&&(v.type==='Trailer'||v.type==='Teaser'));
+        if(t2) trailerId = t2.key;
+      }
+    }catch(e){}
+
+    tmdbSelected = { id, type, title, year, poster, overview, tmdbId: id, trailerId };
 
     // Fill form
     document.getElementById('f-title').value = title;
@@ -742,12 +762,13 @@ function saveItem(){
   const poster=tmdbSelected?.poster||(editId?items.find(i=>i.id===editId)?.poster:'')||'';
   const tmdbId=tmdbSelected?.tmdbId||(editId?items.find(i=>i.id===editId)?.tmdbId:null)||null;
   const year=tmdbSelected?.year||(editId?items.find(i=>i.id===editId)?.year:'')||'';
+  const trailerId=tmdbSelected?.trailerId||(editId?items.find(i=>i.id===editId)?.trailerId:'')||'';
 
   if(editId){
     const it=items.find(i=>i.id===editId);
     const oldList=it.seasonList||[];
     it.seasonList=newSeasons.map((s,si)=>{ const old=oldList[si]||{}; return{eps:s.eps,doneEps:(old.doneEps||[]).filter(ep=>ep<=s.eps),history:old.history||[]}; });
-    Object.assign(it,{title,type,status,category,notes,fav,poster,tmdbId,year});
+    Object.assign(it,{title,type,status,category,notes,fav,poster,tmdbId,year,trailerId});
     toast('Título atualizado!');
   }else{
     // Check for duplicates
@@ -755,7 +776,7 @@ function saveItem(){
     if(duplicate){
       if(!confirm(`"${title}" já existe na tua lista (${STATUS_LABEL[duplicate.status||'towatch']}). Queres adicionar mesmo assim?`)) return;
     }
-    items.push({id:uid(),title,type,status,category,notes,fav,poster,tmdbId,year,seasonList:newSeasons.map(s=>({eps:s.eps,doneEps:[],history:[]})),addedAt:Date.now()});
+    items.push({id:uid(),title,type,status,category,notes,fav,poster,tmdbId,year,trailerId,seasonList:newSeasons.map(s=>({eps:s.eps,doneEps:[],history:[]})),addedAt:Date.now()});
     toast(`"${title}" adicionado!`);
   }
   save(); closeModal(); render();
@@ -802,6 +823,15 @@ async function tmdbRefreshAll(){
       if(data.poster_path && !it.poster){
         it.poster = `https://image.tmdb.org/t/p/w500${data.poster_path}`;
         changed = true;
+      }
+      // fetch trailer if missing
+      if(!it.trailerId){
+        try{
+          const vRes = await fetch(`https://api.themoviedb.org/3/tv/${it.tmdbId}/videos`, {headers:{Authorization:`Bearer ${TMDB_TOKEN}`}});
+          const vData = await vRes.json();
+          const t = (vData.results||[]).find(v=>v.site==='YouTube'&&(v.type==='Trailer'||v.type==='Teaser'));
+          if(t){ it.trailerId = t.key; changed = true; }
+        }catch(e){}
       }
       if(changed) updated++;
     }catch(e){}
@@ -896,6 +926,14 @@ function openDetail(id){
   const notesHtml=it.notes?`<div class="detail-section"><div class="detail-section-title">Sinopse / Notas</div><div class="detail-notes">${it.notes.replace(/</g,'&lt;')}</div></div>`:'';
   const catHtml=it.category?`<span style="font-size:12px;color:var(--text3)"><i class="ti ti-folder" style="font-size:11px"></i> ${it.category}</span>`:'';
 
+  const trailerHtml = it.trailerId ? `
+    <div class="detail-section">
+      <div class="detail-section-title">Trailer</div>
+      <div style="position:relative;padding-bottom:56.25%;border-radius:var(--radius-lg);overflow:hidden;background:#000">
+        <iframe src="https://www.youtube.com/embed/${it.trailerId}" style="position:absolute;inset:0;width:100%;height:100%;border:none" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>` : '';
+
   document.getElementById('detail-content').innerHTML=`
     <div class="detail-hero">
       ${posterHtml}
@@ -916,6 +954,7 @@ function openDetail(id){
       <button class="detail-close" onclick="closeDetail()"><i class="ti ti-x"></i></button>
     </div>
     <div class="detail-body">
+      ${trailerHtml}
       ${notesHtml}
       ${seasonsHtml}
     </div>`;
