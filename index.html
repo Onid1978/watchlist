@@ -191,7 +191,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent-border);box-shadow:0 0 0 3px var(--accent-dim)}
 .field select option{background:var(--surface2)}
 .fields-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.season-row{display:grid;grid-template-columns:1fr 1fr auto;align-items:center;gap:8px;margin-bottom:8px}
+.season-row{display:grid;grid-template-columns:40px 1fr auto auto;align-items:center;gap:8px;margin-bottom:8px}
 .season-row-label{font-size:13px;color:var(--text2)}
 .add-season-btn{font-size:13px;color:var(--text3);background:transparent;border:1px dashed var(--border-med);border-radius:var(--radius);padding:7px 12px;cursor:pointer;width:100%;margin-top:2px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
 .add-season-btn:hover{background:var(--surface3);color:var(--text2)}
@@ -686,18 +686,18 @@ function populateCatSelect(){
   document.getElementById('f-cat').innerHTML=`<option value="">— Sem categoria —</option>${categories.map(c=>`<option value="${c}">${c}</option>`).join('')}`;
 }
 
-function addSeasonRow(eps){
+function addSeasonRow(eps, tenho){
   const container=document.getElementById('seasons-config');
   const idx=container.querySelectorAll('.season-row').length;
   const row=document.createElement('div'); row.className='season-row';
-  row.innerHTML=`<span class="season-row-label">T${idx+1}</span><input type="number" min="1" max="999" value="${eps||10}" placeholder="Episódios"/><button class="remove-season-btn" onclick="removeSeasonRow(this)"><i class="ti ti-x"></i></button>`;
+  row.innerHTML=`<span class="season-row-label">T${idx+1}</span><input type="number" min="1" max="999" value="${eps||10}" placeholder="Episódios"/><label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);white-space:nowrap;cursor:pointer"><input type="checkbox" ${tenho?'checked':''} style="accent-color:var(--accent);width:14px;height:14px"/> Tenho</label><button class="remove-season-btn" onclick="removeSeasonRow(this)"><i class="ti ti-x"></i></button>`;
   container.appendChild(row);
 }
 function removeSeasonRow(btn){
   btn.closest('.season-row').remove();
   document.querySelectorAll('#seasons-config .season-row').forEach((r,i)=>r.querySelector('.season-row-label').textContent=`T${i+1}`);
 }
-function getModalSeasons(){ return Array.from(document.querySelectorAll('#seasons-config .season-row')).map(r=>({eps:Math.max(1,parseInt(r.querySelector('input').value)||1)})); }
+function getModalSeasons(){ return Array.from(document.querySelectorAll('#seasons-config .season-row')).map(r=>({eps:Math.max(1,parseInt(r.querySelector('input[type=number]').value)||1), tenho:r.querySelector('input[type=checkbox]').checked})); }
 function toggleType(){
   document.getElementById('series-config').style.display=document.getElementById('f-type').value==='series'?'block':'none';
   tmdbClear();
@@ -722,7 +722,7 @@ function openModal(id){
     document.getElementById('f-cat').value=it.category||'';
     document.getElementById('f-notes').value=it.notes||'';
     document.getElementById('f-priority').value=it.fav?1:0;
-    (it.seasonList||[]).forEach(s=>addSeasonRow(s.eps));
+    (it.seasonList||[]).forEach(s=>addSeasonRow(s.eps, s.tenho));
     if(it.poster){
       document.getElementById('tmdb-selected-box').style.display='block';
       document.getElementById('tmdb-selected-box').innerHTML=`<div class="tmdb-selected"><img src="${it.poster}" alt=""/><div class="tmdb-selected-info"><div class="tmdb-selected-title">${it.title}</div><div class="tmdb-selected-meta">Capa guardada</div></div><button class="tmdb-clear" onclick="tmdbClear()"><i class="ti ti-x"></i></button></div>`;
@@ -760,7 +760,7 @@ function saveItem(){
   if(editId){
     const it=items.find(i=>i.id===editId);
     const oldList=it.seasonList||[];
-    it.seasonList=newSeasons.map((s,si)=>{ const old=oldList[si]||{}; return{eps:s.eps,doneEps:(old.doneEps||[]).filter(ep=>ep<=s.eps),history:old.history||[]}; });
+    it.seasonList=newSeasons.map((s,si)=>{ const old=oldList[si]||{}; return{eps:s.eps,tenho:s.tenho,doneEps:(old.doneEps||[]).filter(ep=>ep<=s.eps),history:old.history||[]}; });
     Object.assign(it,{title,type,status,category,notes,fav,poster,tmdbId,year,trailerId});
     toast('Título atualizado!');
   }else{
@@ -769,7 +769,7 @@ function saveItem(){
     if(duplicate){
       if(!confirm(`"${title}" já existe na tua lista (${STATUS_LABEL[duplicate.status||'towatch']}). Queres adicionar mesmo assim?`)) return;
     }
-    items.push({id:uid(),title,type,status,category,notes,fav,poster,tmdbId,year,trailerId,seasonList:newSeasons.map(s=>({eps:s.eps,doneEps:[],history:[]})),addedAt:Date.now()});
+    items.push({id:uid(),title,type,status,category,notes,fav,poster,tmdbId,year,trailerId,seasonList:newSeasons.map(s=>({eps:s.eps,tenho:s.tenho,doneEps:[],history:[]})),addedAt:Date.now()});
     toast(`"${title}" adicionado!`);
   }
   save(); closeModal(); render();
@@ -918,7 +918,7 @@ function openDetail(id){
         const epPills=Array.from({length:s.eps},(_,ei)=>{ const ep=ei+1,isDone=done.includes(ep); return `<span class="ep-pill${isDone?' done':''}" onclick="event.stopPropagation();toggleEpDetail('${it.id}',${si},${ep})">Ep ${ep}</span>`; }).join('');
         return `<div class="detail-season-block">
           <div class="detail-season-header" onclick="toggleDetailPanel(this)">
-            <div class="season-header-left"><div class="season-check${allDone?' done':''}" onclick="event.stopPropagation();markAllEpsDetail('${it.id}',${si},${!allDone})"></div>Temporada ${si+1}</div>
+            <div class="season-header-left"><div class="season-check${allDone?' done':''}" onclick="event.stopPropagation();markAllEpsDetail('${it.id}',${si},${!allDone})"></div>Temporada ${si+1}${s.tenho?'<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--green-dim);color:var(--green);border:1px solid rgba(52,211,153,.3);margin-left:6px">✓ Tenho</span>':'<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--red-dim);color:var(--red);border:1px solid rgba(248,113,113,.3);margin-left:6px">✗ Não tenho</span>'}</div>
             <div class="season-header-right">${done.length}/${s.eps}${lastSeen?` · ${lastSeen}`:''}<i class="ti ti-chevron-down chevron"></i></div>
           </div>
           <div class="detail-season-eps">
